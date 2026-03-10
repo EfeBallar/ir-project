@@ -1,0 +1,7 @@
+datasets
+bitsandbytes
+accelerate
+xformers
+einops
+fsspec==2023.1.0
+git+https://github.com/huggingface/transformers.git

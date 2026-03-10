@@ -1,0 +1,861 @@
+{
+    "queries": [
+        {
+            "q": "What temperature should I pre-heat my oven to when making chicken quesadillas?",
+            "r": [
+                [167945, 1],
+                [167954, 1],
+                [21548, 1],
+                [218187, 1],
+                [168524, 1],
+                [68174, 1],
+                [34390, 1],
+                [34410, 1],
+                [85623, 1],
+                [46749, 1],
+                [83613, 1],
+                [210101, 1],
+                [192707, 1],
+                [19157, 1],
+                [46809, 1],
+                [168697, 1],
+                [139022, 1],
+                [168732, 1],
+                [151851, 1],
+                [45356, 1],
+                [45357, 1],
+                [40241, 1],
+                [6453, 1],
+                [179511, 1],
+                [168270, 1],
+                [19788, 1],
+                [223067, 1],
+                [19339, 1],
+                [98716, 1],
+                [191431, 1],
+                [25072, 1]
+            ],
+            "a": "375 is a good temperature, but can go as low as 350 or as high as 400. Adjust times accordingly (longer for lower temperatures)."
+        },
+        {
+            "q": "cajun style shrimp gumbo with an easy roux",
+            "r": [
+                [100931, 1],
+                [185489, 1],
+                [46868, 1],
+                [46870, 1],
+                [171544, 1],
+                [185761, 1],
+                [185762, 1],
+                [115242, 1],
+                [33721, 1],
+                [185529, 1],
+                [129115, 1],
+                [185440, 1]
+            ],
+            "a": ""
+        },
+        {
+            "q": "I'm looking for a spicy pasta sauce, but I forgot the name. I think it was related to Arabs?",
+            "r": [
+                [8618, 1],
+                [8616, 1],
+                [8617, 1],
+                [34333, 1],
+                [127996, 1],
+                [157305, 1]
+            ],
+            "a": "Arrabiata is a traditional tomato-based pasta sauce with a kick."
+        },
+        {
+            "q": "Can I make cornbread in a cast iron pan?",
+            "r": [
+                [158281, 1],
+                [210052, 1],
+                [95620, 1],
+                [188059, 1],
+                [93212, 1],
+                [188060, 1],
+                [196768, 1],
+                [228014, 1],
+                [192578, 1],
+                [154693, 1],
+                [154694, 1],
+                [94717, 1],
+                [37480, 1],
+                [58393, 1],
+                [381, 1]
+            ],
+            "a": "Yes, cast iron pans are a common choice of pan for making cornbread."
+        },
+        {
+            "q": "How long do I need to pre-heat my oven for when making cornbread?",
+            "r": [
+                [158281, 1],
+                [210052, 1],
+                [95620, 1],
+                [188059, 1],
+                [93212, 1],
+                [188060, 1],
+                [196768, 1],
+                [228014, 1],
+                [192578, 1],
+                [154693, 1],
+                [154694, 1],
+                [94717, 1],
+                [37480, 1],
+                [58393, 1],
+                [381, 1]
+            ],
+            "a": "Cornbread should be baked between 400-425F."
+        },
+        {
+            "q": "What is a turducken?",
+            "r": [
+                [217771, 1],
+                [217772, 1]
+            ],
+            "a": "Turducken is a Thanksgiving dish consisting of duck, chicken, and turkey, successively stuffed into each other."
+        },
+        {
+            "q": "How do I make kimchi fried rice?",
+            "r": [
+                [117770, 1],
+                [117771, 1],
+                [176919, 1],
+                [118621, 1]
+            ],
+            "a": ""
+        },
+        {
+            "q": "What kind of rice should I use for kimchi fried rice?",
+            "r": [
+                [117770, 1],
+                [117771, 1],
+                [176919, 1],
+                [118621, 1]
+            ],
+            "a": "Although any hot rice will do, kimchi friend rice is typically considered a \"leftover dish\" and often uses leftover, refrigerated rice."
+        },
+        {
+            "q": "miso glazed salmon recipe",
+            "r": [
+                [136801, 1],
+                [179042, 1],
+                [179299, 1],
+                [99784, 1],
+                [136794, 1],
+                [85456, 1],
+                [144757, 1],
+                [150999, 1],
+                [136825, 1],
+                [136794, 1]
+            ],
+            "a": ""
+        },
+        {
+            "q": "What is the most important ingredient in borscht?",
+            "r": [
+                [186632, 1],
+                [219408, 1],
+                [21403, 1],
+                [27040, 1],
+                [27042, 1],
+                [27043, 1],
+                [27045, 1],
+                [177955, 1],
+                [177956, 1],
+                [172207, 1],
+                [168240, 1],
+                [228149, 1],
+                [1855, 1],
+                [324, 1],
+                [43079, 1],
+                [10708, 1],
+                [138068, 1],
+                [178004, 1],
+                [219348, 1],
+                [219378, 1]
+            ],
+            "a": "The most important ingredient in borscht is beet, which gives it a distinctive purple color."
+        },
+        {
+            "q": "Can I make borscht vegetarian?",
+            "r": [
+                [222018, 1],
+                [324, 1],
+                [21384, 1],
+                [129000, 1],
+                [168240, 1],
+                [219872, 1],
+                [228149, 1],
+                [219863, 1],
+                [32988, 1],
+                [116382, 1],
+                [21408, 1]
+            ],
+            "a": ""
+        },
+        {
+            "q": "What is mirepoix?",
+            "r": [
+                [20257, 1],
+                [194434, 1],
+                [168389, 1],
+                [139399, 1],
+                [20875, 1],
+                [136750, 1],
+                [220851, 1]
+            ],
+            "a": "Mirepoix is a mixture of diced vegetables (usually onion, carrot, and celery) used as a base for a wide variety of sauces and stews."
+        },
+        {
+            "q": "What is \"the holy trinity\"?",
+            "r": [
+                [146713, 1],
+                [125708, 1],
+                [42494, 1],
+                [125660, 1]
+            ],
+            "a": "The \"holy trinity\" refers to the base of diced onion, celery, and bell pepper used for traditional Louisiana dishes, such as gumbo or \u00e9touff\u00e9e."
+        },
+        {
+            "q": "How do I make shakshuka?",
+            "r": [
+                [112178, 1],
+                [112179, 1],
+                [184446, 1],
+                [184448, 1]
+            ],
+            "a": ""
+        },
+        {
+            "q": "Where does shakshuka come from?",
+            "r": [
+                [112178, 1],
+                [112179, 1],
+                [184446, 1],
+                [184448, 1]
+            ],
+            "a": "Shakshuka originated in North Africa, but has since been popularized in Israel."
+        },
+        {
+            "q": "What's a easy recipe for new england clam chowder?",
+            "r": [
+                [168837, 1],
+                [204044, 1],
+                [120333, 1],
+                [76175, 1],
+                [212897, 1],
+                [63402, 1],
+                [141484, 1],
+                [223021, 1],
+                [143274, 1],
+                [143277, 1],
+                [143280, 1]
+            ],
+            "a": ""
+        },
+        {
+            "q": "What's a typical food item from Rhode Island?",
+            "r": [
+                [173159, 1],
+                [15315, 1]
+            ],
+            "a": "Stuffies are a common Rhode Island snack, made from a local clam variety called \"quahog\"."
+        },
+        {
+            "q": "At what temperature should I preheat my oven to bake croquembouche?",
+            "r": [
+                [66895, 1]
+            ],
+            "a": "400 \u00b0F"
+        },
+        {
+            "q": "Is croquembouche intended to be eaten as main course?",
+            "r": [
+                [66895, 1]
+            ],
+            "a": "No, croquembouche is a dessert."
+        },
+        {
+            "q": "My friend told me about 'sopa paraguaya' once. Is it a soup?",
+            "r": [
+                [191270, 1],
+                [152710, 1],
+                [152711, 1],
+                [152712, 1],
+                [152713, 1]
+            ],
+            "a": "No, it is a type of corn bread."
+        },
+        {
+            "q": "Do you know any soups from Paraguay?",
+            "r": [
+                [47167, 1],
+                [191268, 1]
+            ],
+            "a": "Yes, I know two."
+        },
+        {
+            "q": "At what temperature do the Chinese bake a fortune cookie on average?",
+            "r": [
+                [85649, 1],
+                [73422, 1],
+                [108236, 1],
+                [70898, 1]
+            ],
+            "a": "About 330 \u00b0F (300, 300, 350, 375). Beware of the false positives: a lot of 'chinese cookie' recipes are for almond cookies, there is one recipe in the dataset that tells you how to melt chocolate overtop store-bought cookies, and the term 'cookie' matches a lot of recipes with 'cookie sheet'."
+        },
+        {
+            "q": "I want to make an alcoholic drink that tastes like elderflower. Any suggestions?",
+            "r": [
+                [80000, 1],
+                [80002, 1],
+                [80003, 1],
+                [124102, 1],
+                [198830, 1],
+                [178545, 1],
+                [35288, 1],
+                [184473, 1],
+                [109754, 1]
+            ],
+            "a": "Note that elderflower cordial itself is just a soft drink."
+        },
+        {
+            "q": "I've heard that elderflower is a common drink ingredient, but can I make a pastry with it?",
+            "r": [
+                [94340, 1],
+                [179776, 1],
+                [21532, 1],
+                [177661, 1]
+            ],
+            "a": "Doesn't include gooseberry-elderflower ice cream."
+        },
+        {
+            "q": "What temperature should I bake chicken Wellington at?",
+            "r": [
+                [46206, 1],
+                [46205, 1],
+                [46204, 1],
+                [162493, 1],
+                [43849, 1],
+                [45288, 1]
+            ],
+            "a": "Best at 375 \u00b0F (350, 350, 375, 375, 375, 425)."
+        },
+        {
+            "q": "How does Gordon Ramsay make his beef Wellington?",
+            "r": [
+                [20893, 1],
+                [20894, 1],
+                [104615, 1]
+            ],
+            "a": "Also includes the recipe that mentions 'Hell's Kitchen' instead."
+        },
+        {
+            "q": "Is beef Wellington the only kind of meaty Wellington? If not, what other kinds do you know?",
+            "r": [
+                [111233, 1],
+                [111234, 1],
+                [19843, 1],
+                [111235, 1],
+                [163842, 1],
+                [198020, 1],
+                [212609, 1],
+                [183053, 1],
+                [164110, 1],
+                [100367, 1],
+                [70032, 1],
+                [20889, 1],
+                [20890, 1],
+                [20891, 1],
+                [20892, 1],
+                [20893, 1],
+                [20894, 1],
+                [162463, 1],
+                [143522, 1],
+                [104615, 1],
+                [208812, 1],
+                [100526, 1],
+                [111278, 1],
+                [112188, 1],
+                [162493, 1],
+                [132806, 1],
+                [132807, 1],
+                [43849, 1],
+                [19916, 1],
+                [179197, 1],
+                [126542, 1],
+                [174943, 1],
+                [45288, 1],
+                [136053, 1],
+                [100473, 1],
+                [46204, 1],
+                [46205, 1],
+                [46206, 1]
+            ],
+            "a": "No, there's also chicken Wellington, as well as pork and salmon, and also ground beef."
+        },
+        {
+            "q": "Is there a type of seafood found in most recipes for bouillabaisse?",
+            "r": [
+                [210971, 1],
+                [102437, 1],
+                [84487, 1],
+                [13096, 1],
+                [141863, 1],
+                [104586, 1],
+                [183117, 1],
+                [197614, 1],
+                [27152, 1],
+                [27153, 1],
+                [43283, 1],
+                [92919, 1],
+                [17947, 1],
+                [168158, 1]
+            ],
+            "a": "shrimp"
+        },
+        {
+            "q": "I have some lobster tails in the fridge. What's the difference between making chowder with it versus bouillabaisse?",
+            "r": [
+                [168158, 1],
+                [84487, 1],
+                [27152, 1],
+                [125283, 1],
+                [231620, 1],
+                [187556, 1],
+                [143298, 1],
+                [161832, 1],
+                [172169, 1],
+                [11433, 1],
+                [10155, 1],
+                [125296, 1],
+                [89360, 1],
+                [58008, 1],
+                [19737, 1],
+                [143323, 1],
+                [11614, 1],
+                [147167, 1]
+            ],
+            "a": "Chowder typically doesn't contain shellfish with shell. Beware of the 'clam lobster bake' false positive that mentions chowder as an appetiser."
+        },
+        {
+            "q": "Give me some ideas for pasta dishes that contain calamari.",
+            "r": [
+                [91783, 1],
+                [124615, 1],
+                [106, 1],
+                [183281, 1],
+                [124658, 1],
+                [33972, 1],
+                [33975, 1],
+                [193336, 1],
+                [196666, 1],
+                [183228, 1],
+                [183230, 1],
+                [33976, 1],
+                [63059, 1],
+                [153555, 1],
+                [124631, 1],
+                [15262, 1]
+            ],
+            "a": "Calamari is squid (and not octopus), so squid pasta should be matched too. Noodles don't count as pasta."
+        },
+        {
+            "q": "I have some calamari in my fridge, but I'm not really craving chowder or fish soup. Perhaps I can make a pasta sauce?",
+            "r": [
+                [91783, 1],
+                [124615, 1],
+                [106, 1],
+                [183281, 1],
+                [124658, 1],
+                [33972, 1],
+                [33975, 1],
+                [193336, 1],
+                [196666, 1],
+                [183228, 1],
+                [183230, 1],
+                [33976, 1],
+                [63059, 1],
+                [153555, 1],
+                [124631, 1],
+                [15262, 1]
+            ],
+            "a": "Same as previous query but with more confusing terms."
+        },
+        {
+            "q": "What pasta dishes can I make with calamari? I'm allergic to tomato, so please don't include recipes with tomatoes.",
+            "r": [
+                [15262, 1],
+                [33975, 1],
+                [183228, 1],
+                [63059, 1],
+                [124658, 1]
+            ],
+            "a": "Similar to previous query but with negation."
+        },
+        {
+            "q": "What are the three essential ingredients in a baked Alaska?",
+            "r": [
+                [13282, 1],
+                [13283, 1],
+                [50980, 1],
+                [168581, 1],
+                [37606, 1],
+                [186567, 1],
+                [84681, 1],
+                [111231, 1],
+                [104364, 1],
+                [49329, 1],
+                [25017, 1],
+                [95131, 1],
+                [13279, 1],
+                [144461, 1]
+            ],
+            "a": "Ice cream, egg white (meringue), and cake. Beware of the 'baked alaska salmon' and 'alaskan parmesan baked halibut' recipes."
+        },
+        {
+            "q": "What are the three most common recipe ingredients from Alaska?",
+            "r": [
+                [121607, 1],
+                [145033, 1],
+                [22154, 1],
+                [12684, 1],
+                [151186, 1],
+                [180142, 1],
+                [3048, 1],
+                [3049, 1],
+                [3050, 1],
+                [3051, 1],
+                [3052, 1],
+                [3056, 1],
+                [3057, 1],
+                [3059, 1],
+                [3064, 1],
+                [3065, 1],
+                [3066, 1],
+                [3067, 1],
+                [3068, 1],
+                [3069, 1],
+                [3070, 1],
+                [3071, 1],
+                [26683, 1],
+                [30018, 1],
+                [98122, 1],
+                [172875, 1],
+                [84187, 1],
+                [13281, 1],
+                [179295, 1],
+                [38382, 1],
+                [227308, 1],
+                [104562, 1],
+                [227309, 1],
+                [114152, 1],
+                [227310, 1]
+            ],
+            "a": "Salmon, crab, halibut. Not to be confused with ingredients for a baked Alaska, nor with recipes from Alaska without ingredients from Alaska."
+        },
+        {
+            "q": "What meats are commonly used to make pasta alla carbonara?",
+            "r": [
+                [966, 1],
+                [1062, 1],
+                [3145, 1],
+                [3520, 1],
+                [8828, 1],
+                [9755, 1],
+                [10685, 1],
+                [10709, 1],
+                [11686, 1],
+                [11886, 1],
+                [12192, 1],
+                [12404, 1],
+                [25051, 1],
+                [34627, 1],
+                [35115, 1],
+                [36086, 1],
+                [36087, 1],
+                [36088, 1],
+                [36089, 1],
+                [36090, 1],
+                [36091, 1],
+                [36092, 1],
+                [36093, 1],
+                [36094, 1],
+                [36095, 1],
+                [36096, 1],
+                [38511, 1],
+                [42992, 1],
+                [43677, 1],
+                [43678, 1],
+                [43679, 1],
+                [45122, 1],
+                [54187, 1],
+                [56965, 1],
+                [62627, 1],
+                [64033, 1],
+                [69168, 1],
+                [69287, 1],
+                [70070, 1],
+                [75411, 1],
+                [75691, 1],
+                [76667, 1],
+                [77462, 1],
+                [78435, 1],
+                [79275, 1],
+                [79709, 1],
+                [79710, 1],
+                [80116, 1],
+                [83331, 1],
+                [83341, 1],
+                [83349, 1],
+                [83350, 1],
+                [83351, 1],
+                [83460, 1],
+                [83461, 1],
+                [85014, 1],
+                [91657, 1],
+                [91659, 1],
+                [100379, 1],
+                [100589, 1],
+                [104234, 1],
+                [114233, 1],
+                [115581, 1],
+                [117622, 1],
+                [118034, 1],
+                [120262, 1],
+                [120299, 1],
+                [123645, 1],
+                [123708, 1],
+                [123744, 1],
+                [123763, 1],
+                [123964, 1],
+                [124622, 1],
+                [124964, 1],
+                [125803, 1],
+                [126645, 1],
+                [126869, 1],
+                [127210, 1],
+                [128084, 1],
+                [140639, 1],
+                [141612, 1],
+                [141871, 1],
+                [142265, 1],
+                [143742, 1],
+                [144211, 1],
+                [144239, 1],
+                [145874, 1],
+                [147451, 1],
+                [147484, 1],
+                [147524, 1],
+                [150259, 1],
+                [152262, 1],
+                [152847, 1],
+                [153551, 1],
+                [153622, 1],
+                [153623, 1],
+                [153624, 1],
+                [153625, 1],
+                [153626, 1],
+                [153627, 1],
+                [153875, 1],
+                [153948, 1],
+                [157277, 1],
+                [157289, 1],
+                [168112, 1],
+                [168695, 1],
+                [168928, 1],
+                [169517, 1],
+                [171324, 1],
+                [173930, 1],
+                [174105, 1],
+                [176556, 1],
+                [178446, 1],
+                [178934, 1],
+                [179725, 1],
+                [179752, 1],
+                [180801, 1],
+                [180945, 1],
+                [182310, 1],
+                [182483, 1],
+                [184358, 1],
+                [185840, 1],
+                [187099, 1],
+                [188020, 1],
+                [188294, 1],
+                [193327, 1],
+                [193344, 1],
+                [193345, 1],
+                [193346, 1],
+                [193347, 1],
+                [193387, 1],
+                [193388, 1],
+                [193389, 1],
+                [193390, 1],
+                [193492, 1],
+                [193854, 1],
+                [203486, 1],
+                [204120, 1],
+                [212680, 1],
+                [212728, 1],
+                [213820, 1],
+                [213846, 1],
+                [215683, 1],
+                [215757, 1],
+                [216990, 1],
+                [218719, 1],
+                [220104, 1],
+                [221643, 1],
+                [223268, 1],
+                [231070, 1],
+                [231071, 1]
+            ],
+            "a": "Bacon, ham and pancetta, although the true Italian answer is guanciale, which isn't in the database."
+        },
+        {
+            "q": "How many vegetarian carbonara recipes do you know?",
+            "r": [
+                [231070, 1],
+                [144211, 1],
+                [203486, 1],
+                [91657, 1],
+                [8828, 1],
+                [143742, 1],
+                [203486, 1]
+            ],
+            "a": "7 (6 you get from looking up carbonara without bacon, ham or pancetta, plus one that uses 'vegetarian bacon')."
+        },
+        {
+            "q": "I want to eat something with cactus. How many recipes do you know?",
+            "r": [
+                [160656, 1],
+                [33183, 1],
+                [33184, 1],
+                [33187, 1],
+                [33188, 1],
+                [33190, 1],
+                [33191, 1],
+                [33192, 1],
+                [34101, 1],
+                [144950, 1],
+                [144951, 1],
+                [144952, 1],
+                [144953, 1],
+                [159552, 1],
+                [39618, 1],
+                [80836, 1],
+                [80837, 1],
+                [20690, 1],
+                [63954, 1],
+                [172381, 1],
+                [165985, 1],
+                [109668, 1],
+                [217207, 1],
+                [140922, 1],
+                [115328, 1]
+            ],
+            "a": "Half of them are drinks. In Spanish, the name 'nopales' or 'nopalitos' is also used. The 'cactus chicken' has nothing to do with cacti."
+        },
+        {
+            "q": "What is the most common type of cactus used for eating, and which part is eaten most often?",
+            "r": [
+                [160656, 1],
+                [33183, 1],
+                [33184, 1],
+                [33187, 1],
+                [33188, 1],
+                [33190, 1],
+                [33191, 1],
+                [33192, 1],
+                [34101, 1],
+                [144950, 1],
+                [144951, 1],
+                [144952, 1],
+                [144953, 1],
+                [159552, 1],
+                [39618, 1],
+                [80836, 1],
+                [80837, 1],
+                [20690, 1],
+                [63954, 1],
+                [172381, 1],
+                [165985, 1],
+                [109668, 1],
+                [217207, 1],
+                [140922, 1],
+                [115328, 1]
+            ],
+            "a": "The paddles of the prickly pear cactus (nopales)."
+        },
+        {
+            "q": "What are the two key differences between fettucine and linguine?",
+            "r": [
+                [158341, 1]
+            ],
+            "a": "There is one recipe for homemade pasta in the dataset. They describe how fettucine are thick and wide and linguine are thin and narrow."
+        },
+        {
+            "q": "How do I make za'atar?",
+            "r": [
+                [230249, 1],
+                [230250, 1],
+                [230253, 1],
+                [230257, 1],
+                [230262, 1],
+                [45706, 1],
+                [107012, 1],
+                [119162, 1],
+                [129216, 1],
+                [129219, 1],
+                [142188, 1],
+                [197144, 1]
+            ],
+            "a": "Can also search for 'zahtar' or 'zaatar' without the apostrophe."
+        },
+        {
+            "q": "Can I use pork to make shish kebab? If not, what alternative do you suggest?",
+            "r": [
+                [185037, 1],
+                [45688, 1],
+                [185040, 1],
+                [185041, 1],
+                [2800, 1],
+                [8558, 1],
+                [119517, 1]
+            ],
+            "a": "We only have 3 chicken recipes and 3 lamb recipes."
+        },
+        {
+            "q": "How long has Gordon Ramsay been a cook?",
+            "r": [],
+            "a": "N/A"
+        },
+        {
+            "q": "Where can I follow cooking classes?",
+            "r": [],
+            "a": "N/A"
+        },
+        {
+            "q": "What's the wecommended amount of dedotated wam I should have to server?",
+            "r": [],
+            "a": "N/A"
+        },
+        {
+            "q": "How long to boil cheese for?",
+            "r": [],
+            "a": "N/A"
+        },
+        {
+            "q": "I'm allergic to eggs and cheese. Is this normal?",
+            "r": [],
+            "a": "N/A"
+        },
+        {
+            "q": "Is my brain cooked from baking too much rice?",
+            "r": [],
+            "a": "N/A"
+        }
+    ]
+}
