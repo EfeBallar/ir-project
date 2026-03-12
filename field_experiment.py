@@ -151,6 +151,7 @@ if __name__ == "__main__":
     print("Loading dataset and queries...")
     dataset      = datasets.load_dataset("parquet", data_files=DATA_PATH)["train"]
     gold_queries = json.load(open(QUERIES_PATH))["queries"]
+    gold_queries = [q for q in gold_queries if len(q["r"]) > 0]  # filter
 
     # Train bigram model once on name+ingredients (lightweight base)
     print("Training bigram model...")

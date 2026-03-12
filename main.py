@@ -72,8 +72,9 @@ def average_precision(ranked_ids, relevant_ids):
 
 # ── Run evaluation over gold queries ────────────────────────────────────────
 precisions, recalls, f1s, aps = [], [], [], []
-
-for entry in gold_queries["queries"]:
+# Filter out unanswerable queries (empty r) — they have no relevant docs
+answerable_queries = [q for q in gold_queries["queries"] if len(q["r"]) > 0]
+for entry in answerable_queries:
     query        = entry["q"]
     relevant_ids = set(doc_id for doc_id, _ in entry["r"])
 
@@ -96,7 +97,7 @@ macro_f1 = sum(f1s)        / len(f1s)
 # ── Micro averages (aggregate TP/FP/FN first, then compute) ─────────────────
 total_tp, total_retrieved, total_relevant = 0, 0, 0
 
-for entry in gold_queries["queries"]:
+for entry in answerable_queries:
     query        = entry["q"]
     relevant_ids = set(doc_id for doc_id, _ in entry["r"])
     ranked       = retrieve_ids(query, doc_vectors, vocab, idf, bigram, k=10, threshold=0)
@@ -126,12 +127,12 @@ print(f"  Micro  Recall    : {micro_r:.4f}")
 print(f"  Micro  F1        : {micro_f1:.4f}")
 print(f"  MAP              : {MAP:.4f}")
 print("──────────────────────────\n")
-"""
+
 # ── Threshold sensitivity analysis  ───────────────
 print("── Threshold sensitivity (macro F1) ────────────────────────")
 for t in [0.05, 0.10, 0.15, 0.20, 0.25, 0.30, 0.35, 0.40]:
     ps, rs, fs = [], [], []
-    for entry in gold_queries["queries"]:
+    for entry in answerable_queries:
         rel = set(doc_id for doc_id, _ in entry["r"])
         ranked = retrieve_ids(entry["q"], doc_vectors, vocab, idf, bigram, k=3, threshold=t)
         ret = [idx for _, idx in ranked]
@@ -145,7 +146,7 @@ print("────────────────────────�
 print("── k sensitivity (macro F1) ────────────────────────")
 for k in [3, 5, 10, 20, 50]:
     ps, rs, fs = [], [], []
-    for entry in gold_queries["queries"]:
+    for entry in answerable_queries:
         rel = set(doc_id for doc_id, _ in entry["r"])
         ranked = retrieve_ids(entry["q"], doc_vectors, vocab, idf, bigram, k=k, threshold=0)
         ret = [idx for _, idx in ranked]
@@ -154,4 +155,3 @@ for k in [3, 5, 10, 20, 50]:
     print(f"  k={k}  macro-F1={sum(fs)/len(fs):.4f}  "
           f"macro-P={sum(ps)/len(ps):.4f}  macro-R={sum(rs)/len(rs):.4f}")
 print("──────────────────────────\n")
-"""
