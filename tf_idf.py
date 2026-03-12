@@ -8,7 +8,7 @@ from collections import Counter
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
 
-FIELDS = ["name", "tags", "description", "ingredients", "steps"]
+FIELDS = ["name", "tags", "description", "ingredients"] # "steps" excluded via experiment
 STOPWORDS = set(stopwords.words('english'))
 DIGITS = re.compile(r'\d')
 lemmatizer = WordNetLemmatizer()
@@ -79,29 +79,16 @@ def vectorize_query(query, bigram, vocab, idf):
     return vectorize(tokens, vocab, idf)
 
 def tokenize_docs(doc_texts):
-    total = len(doc_texts)
     tokenized_docs = []
-    count = 0
     for text in doc_texts:
         tokenized_docs.append(preprocess(text))
-        count += 1
-        if count % 20000 == 0:
-            percent = 100 * count / total
-            print(f"Tokenized docs ({percent:.2f}%)")
-    print("Finished tokenizing docs")
+    print("Tokenized docs")
     return tokenized_docs
 
 def train_bigram_model(tokenized_docs):
     # after preprocessing all docs into token lists
     phrases = Phrases(tokenized_docs, min_count=5, threshold=3.0)
     bigram = Phraser(phrases)
-    print("Finished training bigram model")
+    print("Trained bigram model")
     return bigram
 
-def retrieve_top_k_docs(retrieval_queries, doc_vectors, vocab, idf, bigram, k=5, threshold=0.3):
-    for retrieval_query in retrieval_queries:
-        query_vec = vectorize_query(retrieval_query, bigram, vocab, idf)
-        scores = [(dot_sparse(query_vec, vec), idx) for idx, vec in enumerate(doc_vectors)]
-        scores.sort(reverse=True)
-        results = [(score, idx) for score, idx in scores if score >= threshold][:k]
-        return results
