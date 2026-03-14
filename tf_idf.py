@@ -1,6 +1,5 @@
-# source venv/bin/activate
-import math
-import re
+# utility functions - can not execute
+import math, re
 import numpy as np
 from gensim.models import Phrases
 from gensim.models.phrases import Phraser
@@ -8,7 +7,7 @@ from collections import Counter
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
 
-FIELDS = ["name", "tags", "description", "ingredients"] # "steps" excluded via experiment
+FIELDS = ["name", "tags", "description", "ingredients"] # "steps" excluded via experiment - check 'field_experiment.py' file for details
 STOPWORDS = set(stopwords.words('english'))
 DIGITS = re.compile(r'\d')
 lemmatizer = WordNetLemmatizer()
@@ -82,13 +81,12 @@ def tokenize_docs(doc_texts):
     tokenized_docs = []
     for text in doc_texts:
         tokenized_docs.append(preprocess(text))
-    print("Tokenized docs")
+    print("Tokenized docs.")
     return tokenized_docs
 
 def train_bigram_model(tokenized_docs):
     # after preprocessing all docs into token lists
     phrases = Phrases(tokenized_docs, min_count=5, threshold=3.0)
     bigram = Phraser(phrases)
-    print("Trained bigram model")
+    print("Trained bigram model.")
     return bigram
-
