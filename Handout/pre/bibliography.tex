@@ -1,0 +1,42 @@
+% Add a comma in \cite and \parencite
+\renewcommand*{\nameyeardelim}{\addcomma\space}
+
+% Make the name AND the year hyperlinked, not just the year. https://tex.stackexchange.com/a/27107/203081
+\DeclareFieldFormat{citehyperref}{%
+	\DeclareFieldAlias{bibhyperref}{noformat}% Avoid nested links
+	\bibhyperref{#1}}
+
+\DeclareFieldFormat{textcitehyperref}{%
+	\DeclareFieldAlias{bibhyperref}{noformat}% Avoid nested links
+	\bibhyperref{%
+		#1%
+		\ifbool{cbx:parens}
+		{\bibcloseparen\global\boolfalse{cbx:parens}}
+		{}}}
+
+\savebibmacro{cite}
+\savebibmacro{textcite}
+\renewbibmacro*{cite}{%
+	\printtext[citehyperref]{%
+		\restorebibmacro{cite}%
+		\usebibmacro{cite}}}
+
+\renewbibmacro*{textcite}{%
+	\ifboolexpr{
+		( not test {\iffieldundef{prenote}} and
+		test {\ifnumequal{\value{citecount}}{1}} )
+		or
+		( not test {\iffieldundef{postnote}} and
+		test {\ifnumequal{\value{citecount}}{\value{citetotal}}} )
+	}
+	{\DeclareFieldAlias{textcitehyperref}{noformat}}
+	{}%
+	\printtext[textcitehyperref]{%
+		\restorebibmacro{textcite}%
+		\usebibmacro{textcite}}}
+
+% Add a little more space between bib entries.
+\setlength\bibitemsep{0.5em}
+
+% Make all authors, not just the first, be cited in reverse order.
+\DeclareNameAlias{sortname}{last-first}

@@ -22,6 +22,49 @@ print("Built vocab.")
 doc_vectors = [vectorize(tokens, vocab, idf) for tokens in tokenized_docs]
 print("Vectorized docs.")
 
+# ── Qualitative retrieval test (5 manual queries for TF-IDF drawback analysis) ──
+qualitative_queries = [
+    "cajun style gumbo with an easy roux",
+    "shrimp tacos recipe for tonight",
+    "vegetarian lasagna but easy",
+    "spageti and meatballs?",
+    "lunch baked at 200 °C",
+]
+
+print("── Qualitative retrieval (k=3) ──────────────────────────────")
+for query in qualitative_queries:
+    ranked = retrieve_ids(query, doc_vectors, vocab, idf, bigram, k=3, threshold=0)
+    print(f"\nQuery: {query}")
+    for score, idx in ranked:
+        print(f"  {score:.3f}  {dataset[idx].get('name', '')}")
+print("─────────────────────────────────────────────────────────────\n")
+"""── Qualitative retrieval (k=3) ──────────────────────────────
+
+Query: cajun style gumbo with an easy roux
+  0.409  gumbo base aka roux
+  0.406  double roux cajun seafood gumbo
+  0.391  cajun style chicken gumbo
+
+Query: shrimp tacos recipe for tonight
+  0.372  simple shrimp tacos
+  0.341  u peel em shrimp
+  0.325  firecracker shrimp tacos
+
+Query: vegetarian lasagna but easy
+  0.555  pumpkin pine nut lasagna
+  0.552  one step lasagna
+  0.509  easy vegetable lasagna
+
+Query: spageti and meatballs?
+  0.601  easy meatballs
+  0.570  party meatball sauce
+  0.531  homemade fabulous meatballs
+
+Query: lunch baked at 200 °C
+  0.334  baked corn dogs
+  0.313  cheesy baked egg
+  0.309  fish stick batter
+─────────────────────────────────────────────────────────────"""
 # Filter out unanswerable queries (empty r) — they have no relevant docs
 answerable_queries = [q for q in gold_queries["queries"] if len(q["r"]) > 0]
 print(f"Loaded {len(gold_queries['queries'])} queries, {len(answerable_queries)} answerable.")
@@ -112,7 +155,6 @@ for k in [3, 5, 10, 20, 50]:
     print(f"  k={k}  macro-F1={sum(fs)/len(fs):.4f}  "
           f"macro-P={sum(ps)/len(ps):.4f}  macro-R={sum(rs)/len(rs):.4f}")
 print("──────────────────────────\n")
-
 """
 Loaded 47 queries, 41 answerable.
 

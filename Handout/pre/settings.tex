@@ -1,0 +1,32 @@
+% Title
+\title{\vspace{-1em}\Large\udl{\textbf{H02C8b Information Retrieval and Search Engines:} Project Handout}\vspace{-1em}}
+\date{\vspace{-0.9em}\today\vspace{-0.25em}}
+
+% Column separation
+\setlength{\columnsep}{1.25em}
+\newlength{\secsep}
+\setlength{\secsep}{0.95em}
+
+% Smaller titles
+\titleformat{\section}{\normalfont\Large\bfseries}{\thesection}{0.5em}{\udl{#1}}
+\titleformat{\subsection}{\normalfont\normalsize\bfseries}{\thesubsection}{0.5em}{#1}
+\titleformat{\subsubsection}{\normalfont\normalsize\bfseries}{\thesubsubsection}{0.5em}{#1}
+
+\titlespacing{\section}{0em}{\secsep}{0.25em}
+\titlespacing{\subsection}{0em}{\secsep}{0.25em}
+\titlespacing{\subsubsection}{0em}{\secsep}{0.25em}
+
+\input{pre/bibliography}
+
+% Hyperref
+\addto\extrasenglish{
+	\def\sectionautorefname{\S\hspace{-0.2em}}
+	\def\subsectionautorefname{\S\hspace{-0.2em}}
+}
+
+\hypersetup{
+	colorlinks=true,
+	linkcolor=BrickRed,
+	citecolor=ForestGreen,
+	urlcolor=DarkOrchid
+}

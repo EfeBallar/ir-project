@@ -1,0 +1,45 @@
+% "Time spent" box
+\newcommand{\timespent}[2]{%
+\begin{textblock}{5.5}(0,0)
+\begin{mdframed}
+\textbf{Time spent on code:} #1 \\
+\textbf{Time spent on slides:} #2
+\end{mdframed}
+\end{textblock}}
+
+% Math
+\newcommand{\bigO}{\mathcal{O}}
+
+% Code
+\let\cd\texttt
+
+% Names
+\newcommand{\bert}{\textsc{bert}\xspace}
+\newcommand{\roberta}{Ro\textsc{bert}a\xspace}
+\newcommand{\spanbert}{Span\textsc{Bert}\xspace}
+\newcommand{\base}{\hspace{-3pt}\textsubscript{base}\xspace}
+
+% Better underline (https://tex.stackexchange.com/a/75406/203081)
+\usepackage[outline]{contour}
+\usepackage{ulem}
+\normalem % use classical emph
+
+\newcommand \myul[4]{%
+  \begingroup%
+  \renewcommand \ULdepth {#1}%
+  \renewcommand \ULthickness {#2}%
+  \contourlength{#3}%
+  \uline{\phantom{#4}}\llap{\contour{white}{#4}}%
+  \endgroup%
+}
+
+\newcommand\myulline[4]{%
+  \begingroup%
+  \renewcommand \ULdepth {#1}%
+  \renewcommand \ULthickness {#2}%
+  \contourlength{#3}%
+  \noindent\rlap{\uline{\hspace{\textwidth}}}\contour{white}{#4}%
+  \endgroup%
+}
+
+\newcommand{\udl}[1]{\myul{1.2pt}{0.55pt}{0.5pt}{#1}}
