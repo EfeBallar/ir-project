@@ -6,7 +6,7 @@
 \input{pre/bibliography}
 \begin{document}
 \author{Efe Ballar (r1072381)}
-\timespent{15 hours}{5 hours}
+\timespent{10 hours}{8 hours}
 \twocolumn[\maketitle]
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -19,78 +19,77 @@
     \label{fig:architecture}
 \end{figure*}
 
-Figure~\ref{fig:architecture} shows the full pipeline from user query to generated answer. The system consists of two phases: an \textbf{indexing} phase and a \textbf{retrieval and generation} phase.
+Figure~\ref{fig:architecture} shows the full pipeline from user query to generated answer, with three phases: \textbf{indexing}, \textbf{retrieval} and \textbf{generation}.
 
 \paragraph{Recipe dataset.}
 Each recipe contains five fields: \textit{name}, \textit{tags}, \textit{description}, \textit{ingredients}, and \textit{steps}.
 
 \paragraph{doc\_to\_text.}
-Concatenates the four selected fields (\textit{name}, \textit{tags}, \textit{description}, \textit{ingredients}) into a single string per document. The \textit{steps} field is excluded (validated experimentally; see Section~\ref{sec:embeddings}).
+Concatenates the selected fields into a single string per document. The \textit{steps} field is excluded (validated experimentally; see Section~\ref{sec:embeddings}).
 
 \paragraph{preprocess.}
-Converts a raw string into a list of tokens via: (1) regex tokenization, (2) stopword/digit removal, and (3) lemmatization with \texttt{WordNetLemmatizer}.
+Converts string into a list of tokens via: regex tokenization, stopword/digit removal, and lemmatization with \texttt{WordNetLemmatizer}.
 
 \paragraph{Bigram model.}
-A \texttt{gensim} \texttt{Phraser} model \\ \parencite{rehurek_software_2010} trained on the tokenized corpus detects multi-word expressions by pointwise mutual information (PMI) with \texttt{min\_count=5} and \texttt{threshold=3}. This allows compound terms such as \textit{olive\_oil} to be treated as single vocabulary entries.
+A \texttt{gensim} \texttt{Phraser} model \\ \parencite{rehurek_software_2010} trained on the tokenized corpus detects multi-word (e.g. \textit{olive\_oil}) expressions.
 
 \paragraph{build\_vocab.}
-Constructs the term vocabulary $V$ from the corpus using document-frequency filtering: terms appearing in fewer than 5 documents or more than 50\% of documents are excluded. The vocabulary is capped at 50\,000 terms. IDF weights are computed as:
+Constructs the vocabulary from the corpus using document-frequency filtering. IDF weights are:
 \[
     \mathrm{idf}(t) = \log\!\left(\frac{N+1}{\mathrm{df}(t)+1}\right) + 1
 \]
-where $N$ is the total number of documents and $\mathrm{df}(t)$ is the number of documents containing term $t$. The $+1$ smoothing prevents zero IDF for terms appearing in all documents.
+where $N$ is the total number of documents and $\mathrm{df}(t)$ is the number of documents containing term $t$. Smoothing is for terms appearing in all documents.
 
-\paragraph{vectorize.}
+\paragraph{\\ vectorize.}
 Embeds a token list as a sparse TF-IDF vector. Term frequency is scaled as $\mathrm{tf}(t) = 1 + \log(\mathrm{count}(t))$, multiplied by the precomputed IDF weight, and the resulting vector is L2-normalized.
 
 \paragraph{Document vector store.}
 The $N$ resulting sparse vectors are stored in memory as a list of dictionaries mapping vocabulary indices to TF-IDF weights.
 
 \paragraph{vectorize\_query.}
-At query time, the user query undergoes the identical preprocessing pipeline and is vectorised using the \emph{same} vocabulary and weights. Out-of-vocabulary queries produce a zero vector, which is handled explicitly.
+At query time, the user query undergoes the identical preprocessing pipeline and is vectorised using the \emph{same} vocabulary and weights.
 
 \paragraph{dot\_sparse.}
-Computes cosine similarity between the query vector and each document vector via a sparse dot product. Since both vectors are L2-normalised, the dot product equals cosine similarity, making a separate normalization step unnecessary.
+Computes cosine similarity between the query vector and each document vector via a sparse dot product.
 
-\paragraph{Top-$k$ selection.}
+\paragraph{\\Top-$k$ selection.}
 Document scores are sorted in descending order and the top $k$ documents are returned. The value of $k$ is determined experimentally (see Section~\ref{sec:retrieval}).
 
 \paragraph{Prompt formatter.}
-Combines the original query with the $k$ retrieved recipes into a structured prompt using LLM's chat template. Unlike the indexing step, the \textit{steps} field \emph{is} included here.
-
+Combines the original query with the $k$ retrieved recipes into a structured prompt using LLM's chat template.
 \paragraph{Mistral-7B-Instruct.}
-An instruction-tuned language model \parencite{jiang_mistral_2023} that generates a natural-language answer conditioned on the prompt. The model is loaded in 4-bit NF4 quantisation \parencite{ouyang_training_2022} to reduce memory requirements.
-
+An instruction-tuned language model \parencite{jiang_mistral_2023} that generates a natural-language answer conditioned on the prompt.
 %%%%%% SECTION 2 %%%%
-
 \section{Term Vocabulary}
 
 \paragraph{Which terms enter $V$? }
-The vocabulary $V$ is derived entirely from the corpus rather than fixed in advance. Every token surviving the preprocessing pipeline is a candidate term. Candidates are then filtered: a term $t$ is admitted to $V$ only if
+The vocabulary $V$ is derived from the corpus rather than fixed. Every token surviving the preprocessing pipeline is a candidate term. Candidates are then filtered: a term $t$ is admitted to $V$ only if
 \[
     \texttt{min\_df} \;\leq\; \mathrm{df}(t) \;\leq\; \lfloor\texttt{max\_df\_ratio} \times N\rfloor
 \]
 with $\texttt{min\_df} = 5$ and $\texttt{max\_df\_ratio} = 0.5$. The lower bound removes terms that appear in too few documents, and the upper bound removes terms that appear in almost every recipe, such as \textit{cook}, and \textit{stir}.
 
 \paragraph{Vocabulary size.}
-The vocabulary size is \emph{not} pre-determined. Fixing a hard cutoff may discard domain-relevant rare terms (e.g.\textit{mirepoix}). Instead, the size emerges naturally from the document-frequency filter. A soft cap of $\texttt{max\_vocab} = 50\,000$ is applied only as a safeguard against large vocabularies; in practice the filter alone produces a vocabulary well within this limit.
+The vocabulary size is \emph{not} pre-determined. Instead, the size emerges naturally from the document-frequency filter. A soft cap of $\texttt{max\_vocab} = 50\,000$ is applied only as a safeguard against large vocabularies; in practice the filter alone produces a vocabulary well within this limit.
 
 \paragraph{Multi-word expressions.}
-Single-token representation fails for compound names such as \textit{olive oil}, and \textit{baking powder}: splitting them loses the compound meaning. To address this, a bigram model is trained on the tokenized corpus using \texttt{gensim} \texttt{Phrases} \parencite{rehurek_software_2010} with \texttt{min\_count=5} and \texttt{threshold=3.0}. A bigram $(w_1, w_2)$ is added to the vocabulary as a single token when the two words co-occur significantly more than expected by chance:
+A bigram model is trained on the tokenized corpus with \texttt{threshold=3}. A bigram $(w_1, w_2)$ is added to the vocabulary as a single token when the two words co-occur (e.g. \textit{olive oil}, \textit{baking powder}) significantly more than expected:
 \[
     \frac{\mathrm{count}(w_1 w_2) \cdot N}{\mathrm{count}(w_1) \cdot \mathrm{count}(w_2)} > \delta
 \]
 where $N$ is the total number of tokens in the corpus and $\delta = 3.0$ is the threshold. The same bigram model is applied to both documents and queries at vectorization time for consistency.
 
 %%% SECTION 3 %%%%
-
+\newpage
 \section{Document Embeddings}
 \label{sec:embeddings}
 
 \paragraph{Field selection.}
 Each recipe has five fields: \textit{name}, \textit{tags}, \textit{description}, \textit{ingredients}, and \textit{steps}. To determine which fields to include in the document embeddings, an experiment using $k=10$ has been ran, varying the field combination while keeping all other pipeline components fixed. Results are shown in Table~\ref{tab:fields}; see \texttt{field\_experiment.py} for the experiment code.
 
-\begin{table*}[h]
+The largest single improvement comes from adding \textit{description}, which gives the largest single gain, +40\% macro-F1 over \textit{name + ingredients}. Adding \textit{tags} provides a further improvement across all combinations, as tags such as \textit{vegetarian} directly match intent words. Including \textit{steps} hurts MAP, because procedural language (\textit{add}, \textit{stir}) is uniformly distributed across recipes and dilutes the signal. The final field combination used in the pipeline is therefore \textbf{name + ingredients + description + tags}. Notice that scores are low, this is expected: many gold queries require reasoning (e.g.\ ``What temperature should I pre-heat my oven to?'') rather than lexical matching, which limits retrieval quality.
+\newpage
+\begin{table*}[!t]
 \centering
 \caption{Retrieval performance by field combination ($k=10$, no threshold). Best MAP highlighted.}
 \label{tab:fields}
@@ -108,11 +107,8 @@ name + ingredients + description + tags + steps & 0.076 & 0.087 & 0.070 & 0.033 
 \hline
 \end{tabular}
 \end{table*}
-
-The largest single improvement comes from adding \textit{description}, which nearly doubles MAP compared to \textit{name + ingredients} alone. Adding \textit{tags} provides a further consistent improvement across all combinations, as tags such as \textit{vegetarian} directly match query intent words. Including \textit{steps} hurts MAP despite increasing recall slightly, because procedural language (\textit{add}, \textit{stir}) is uniformly distributed across recipes and dilutes the discriminative signal. The final field combination used in the pipeline is therefore \textbf{name + ingredients + description + tags}. You may notice that these scores are quite low, this is expected given the nature of TF-IDF: many gold queries require semantic reasoning (e.g.\ ``What temperature should I pre-heat my oven to?'') rather than lexical matching, which fundamentally limits retrieval quality. Finally, note that \textit{steps} is excluded from IR indexing but included when formatting recipes for the language model, since the procedural detail is needed to answer queries.
-
-\paragraph{Query vectorization.}
-The query string undergoes the same preprocessing pipeline as the documents: regex tokenisation, stopword removal, digit removal, lemmatisation, and bigram expansion. This ensures queries and documents reside in the same vector space. The resulting token list is then embedded using the same TF-IDF formula as the documents. For each term $t$ in the query:
+\paragraph{\\Query vectorization.}
+The query string undergoes the same preprocessing pipeline as the documents: stopword/digit removal, lemmatization, and bigram expansion. This ensures queries and documents reside in the same vector space. The resulting tokens are embedded using the same TF-IDF formula as the documents. For each term $t$ in the query:
 \begin{align*}
     \vec{q}_t &= \mathrm{tf}(t) \times \mathrm{idf}(t) \\
               &= \bigl(1 + \log \mathrm{count}(t)\bigr) \times \left(\log\frac{N+1}{\mathrm{df}(t)+1} + 1\right)
@@ -123,6 +119,7 @@ The resulting vector is L2-normalized, making it directly comparable to the norm
 If every term in the query is absent from $V$, the query vector is the zero vector. This is detected explicitly: a zero vector produces undefined cosine similarity, so the system returns an empty result set and reports that no matching terms were found. For partially out-of-vocabulary queries, known terms still contribute to the query vector and retrieval degrades gracefully, which is a natural property of TF-IDF.
 
 %%% SECTION 4 %%%%
+\newpage
 \section{Retrieval}
 \label{sec:retrieval}
 
@@ -157,22 +154,22 @@ $k$ was chosen empirically via a sensitivity experiment run over $k \in \{3, 5, 
 
 \begin{table}[h]
 \centering
-\caption{$k$ sensitivity (threshold=0). $k=3$ maximises macro-F1; $k=10$ maximises MAP.}
+\caption{$k$ sensitivity (threshold=0). $k=3$ maximises macro-F1; MAP increases monotonically with $k$.}
 \label{tab:k}
 \begin{tabular}{ccccc}
 \hline
-$k$ & \textbf{macro-P} & \textbf{macro-R} & \textbf{macro-F1} \\
+$k$ & \textbf{macro-P} & \textbf{macro-R} & \textbf{macro-F1} & \textbf{MAP} \\
 \hline
-3  & 0.163 & 0.083 & 0.095 \\
-5  & 0.102 & 0.083 & 0.077 \\
-10 & 0.081 & 0.115 & 0.080 \\
-20 & 0.055 & 0.148 & 0.069 \\
-50 & 0.031 & 0.178 & 0.048 \\
+3  & 0.163 & 0.083 & 0.095 & 0.053 \\
+5  & 0.102 & 0.083 & 0.077 & 0.053 \\
+10 & 0.081 & 0.115 & 0.080 & 0.062 \\
+20 & 0.055 & 0.148 & 0.069 & 0.066 \\
+50 & 0.031 & 0.178 & 0.048 & 0.070 \\
 \hline
 \end{tabular}
 \end{table}
 
-The threshold experiment shows that all thresholds below 0.25 produce identical results, meaning every top-3 document already scores above 0.25 naturally, \textbf{$k$ is the binding constraint, not the threshold}. I therefore set threshold to 0 and focus on $k$. The $k$ sensitivity table shows the classic precision/recall tradeoff: smaller $k$ yields higher precision, larger $k$ yields higher recall. I select $\mathbf{k=10}$ as the final value since MAP better captures ranking quality, and $k=10$ maximises MAP. However note that for the LLM's generation step, $k=5$ is used to keep the prompt within the language model's context window.
+The threshold experiment shows that all thresholds below 0.25 produce identical results, meaning every top-3 document already scores above 0.25 naturally, \textbf{$k$ is the binding constraint, not the threshold}. I therefore set threshold to 0 and focus on $k$. The $k$ sensitivity table shows that MAP increases monotonically with $k$, suggesting more retrieved documents help ranking quality. I select $\mathbf{k=10}$ as a practical tradeoff between retrieval quality and computational cost. Note that for the LLM's generation step, $k=5$ is used to keep the prompt within the language model's context window.
 
 \paragraph{Macro and micro averaged metrics.}
 All metrics are computed on the given 41 answerable gold queries (6 queries with no relevant documents are excluded). Full results are in Table~\ref{tab:metrics}.
@@ -207,6 +204,7 @@ Here $|R_j|$ is the total number of relevant documents for query $q_j$; $K$ is t
 
 %%% SECTION 5 %%%%
 \section{Qualitative Analysis (TF-IDF)}
+
 \label{sec:qualitative-ir}
 
 I ran five queries through the retrieval pipeline ($k=3$, threshold=0) to identify failures of TF-IDF. Three results per query are sufficient to illustrate each drawback.
@@ -239,7 +237,7 @@ The second result, \textit{u peel em shrimp}, has no relation to tacos. It ranks
 \textit{Query:} \texttt{cajun style gumbo with an easy roux} \\
 \textit{Retrieved:} gumbo base aka roux (0.41), double roux cajun seafood gumbo (0.4), cajun style chicken gumbo (0.39)
 
-The results are reasonable, but none directly answers the query, which is a gumbo recipe that specifically includes an easy roux method. TF-IDF retrieves documents containing the right words but cannot reason if a recipe satisfies the implied constraint of simplicity. 
+The results are reasonable, but none directly answers the query, which is a gumbo recipe that specifically includes an easy roux method. TF-IDF retrieves documents containing the right words but cannot reason if a recipe satisfies the implied constraint of simplicity.
 %%% SECTION 6 %%%%
 \clearpage
 \section{Prompt Design}
@@ -368,7 +366,7 @@ To verify the model does not use its own knowledge, I ran the same query with an
 \textbf{Query:} {\small\ttfamily What is a turducken?}
 
 \textbf{Retrieved:} {\small\ttfamily turducken thanksgiving sides, turducken roulade, turducken chicken duck turkey, turducken, umami stuffing}
-
+\newpage
 \textbf{With RAG context:} {\small\ttfamily A turducken is a dish consisting of a deboned turkey stuffed with a deboned duck, which in turn is stuffed with a deboned chicken. The deboning process is time-consuming and may be done the day before to save time. The turducken is then seasoned, stuffed with prepared stuffing, and slow-cooked. The recipes provide detailed instructions for deboning and assembling a turducken, as well as preparing Cajun-inspired stuffing and rice dressing.}
 
 \textbf{Without context (bare LM):} {\small\ttfamily A turducken is a culinary dish that consists of a deboned turkey stuffed with a duck, which in turn is stuffed with a chicken. It is a combination of three poultry dishes in one, and is considered an intricate and indulgent holiday meal.}
