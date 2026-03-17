@@ -130,7 +130,7 @@ I chose  \textbf{cosine similarity} as the nearest-neighbour operator. Since bot
 \]
 Cosine similarity is the standard choice for TF-IDF retrieval \parencite{manning_introduction_2008} because it is invariant to document length, so a short recipe and a long recipe with similar content score equally. This choice does not require experimental validation as it is a well-established property.
 \paragraph{Determining $k$.}
-$k$ was chosen empirically via a sensitivity experiment run over $k \in \{3, 5, 10, 20, 50\}$ on the gold query set (see \texttt{evaluate.py}). I also ran a threshold sensitivity experiment to test if filtering retrieved documents by minimum cosine score improves results. Table~\ref{tab:threshold} and Table~\ref{tab:k} show the results.
+$k$ was chosen empirically via a sensitivity experiment run on the gold query set (see \texttt{evaluate.py}). I also ran a threshold sensitivity experiment to test if filtering retrieved documents by minimum score improves results. Table~\ref{tab:threshold} and Table~\ref{tab:k} show the results.
 
 \begin{table}[h]
 \centering
@@ -169,14 +169,16 @@ $k$ & \textbf{macro-P} & \textbf{macro-R} & \textbf{macro-F1} & \textbf{MAP} \\
 \end{tabular}
 \end{table}
 
-The threshold experiment shows that all thresholds below 0.25 produce identical results, meaning every top-3 document already scores above 0.25 naturally, \textbf{$k$ is the binding constraint, not the threshold}. I therefore set threshold to 0 and focus on $k$. The $k$ sensitivity table shows that MAP increases monotonically with $k$, suggesting more retrieved documents help ranking quality. I select $\mathbf{k=10}$ as a practical tradeoff between retrieval quality and computational cost. Note that for the LLM's generation step, $k=5$ is used to keep the prompt within the language model's context window.
+The threshold experiment shows that all thresholds below 0.25 produce identical results, meaning \textbf{$k$ is the binding constraint, not the threshold}. I therefore set threshold to 0 and focused on $k$. 
+\newpage 
+The $k$ sensitivity shows that MAP increases with $k$, suggesting more retrieved documents help ranking. I select $\mathbf{k=10}$ as a practical tradeoff between retrieval quality and computational cost. Note that for the LLM's generation step, $k=5$ is used to keep the prompt within the model's context window.
 
 \paragraph{Macro and micro averaged metrics.}
 All metrics are computed on the given 41 answerable gold queries (6 queries with no relevant documents are excluded). Full results are in Table~\ref{tab:metrics}.
 
 \begin{table}[h]
 \centering
-\caption{Retrieval evaluation results ($k=10$, threshold=0).}
+\caption{Retrieval evaluation results ($k=10$).}
 \label{tab:metrics}
 \begin{tabular}{lcc}
 \hline
@@ -189,10 +191,9 @@ F1        & 0.0798 & 0.0667 \\
 \end{tabular}
 \end{table}
 
-Macro averages compute each metric per query and then average across queries, treating every query equally. Micro averages aggregate true positives, and relevant documents before computing metrics, giving more weight to queries with many relevant documents. The identical macro and micro precision values are a consequence of fixed $k=10$: every query retrieves exactly 10 documents, so $\sum|\hat{D}_j| = 10|Q|$ in both formulations.
-
+Macro averages compute each metric per query, treating every query equally. Micro averages give more weight to queries with many relevant documents. The identical macro and micro precisions are a consequence of fixed $k=10$: every query retrieves exactly 10 documents, so $\sum|\hat{D}_j| = 10|Q|$ in both formulations.
+\clearpage
 \paragraph{Mean Average Precision (MAP).}
-MAP is defined as:
 \[
     \mathrm{MAP} = \frac{1}{|Q|} \sum_{j=1}^{|Q|} \mathrm{AP}(q_j)
 \]
@@ -200,44 +201,44 @@ where $|Q| = 41$ is the number of answerable queries and $\mathrm{AP}(q_j)$ is t
 \[
     \mathrm{AP}(q_j) = \frac{1}{|R_j|} \sum_{k=1}^{K} P@k \cdot \mathrm{rel}(k)
 \]
-Here $|R_j|$ is the total number of relevant documents for query $q_j$; $K$ is the total number of retrieved documents; $P@k$ is the precision computed considering only the first $k$ documents in the ranked list, i.e.\ $P@k = \frac{1}{k}\sum_{i=1}^{k}\mathrm{rel}(i)$; and $\mathrm{rel}(k) \in \{0,1\}$ indicates whether the document at rank $k$ is relevant. The phrase \emph{at $k$} means: restrict attention to the top $k$ retrieved documents. System achieves $\mathrm{MAP} = \mathbf{0.0618}$.
+$|R_j|$ is the total number of relevant documents for query $q_j$; $K$ is the total number of retrieved documents; $P@k$ is the precision computed considering first $k$ documents in the ranked list, i.e.\ $P@k = \frac{1}{k}\sum_{i=1}^{k}\mathrm{rel}(i)$; and $\mathrm{rel}(k) \in \{0,1\}$ indicates if the document at rank $k$ is relevant. System $\mathrm{MAP} = \mathbf{0.0618}$.
 
 %%% SECTION 5 %%%%
+\newpage
 \section{Qualitative Analysis (TF-IDF)}
 
 \label{sec:qualitative-ir}
 
-I ran five queries through the retrieval pipeline ($k=3$, threshold=0) to identify failures of TF-IDF. Three results per query are sufficient to illustrate each drawback.
-
+I ran five queries through the pipeline ($k=3$, threshold=0) to identify failures of TF-IDF.
 \paragraph{Drawback 1: No understanding of query.}
 \textit{Query:} \texttt{vegetarian lasagna but easy} \\
 \textit{Retrieved:} pumpkin pine nut lasagna (0.555), one step lasagna (0.55), easy vegetable lasagna (0.51)
 
-TF-IDF matched on \textit{lasagna} and \textit{easy} correctly, but has no understanding of what \textit{vegetarian} means as a constraint. The first two results may contain meat, TF-IDF cannot reason about dietary requirements.
+TF-IDF matched on \textit{lasagna} and \textit{easy} correctly, but has no understanding of what \textit{vegetarian} means as a constraint. The first two results may contain meat.
 
 \paragraph{Drawback 2: No tolerance for spelling errors.}
 \textit{Query:} \texttt{spageti and meatballs?} \\
 \textit{Retrieved:} easy meatballs (0.6), party meatball sauce (0.57), homemade fabulous meatballs (0.53)
 
-The misspelling \textit{spageti} is out-of-vocabulary and silently dropped. The entire query is resolved by \textit{meatball} alone, skewing results toward meatball dishes and missing spaghetti entirely.
+The misspelling \textit{spageti} is out-of-vocabulary and silently dropped. The entire query is resolved by \textit{meatball} alone, missing spaghetti entirely.
 
 \paragraph{Drawback 3: Cannot handle units, numbers.}
 \textit{Query:} \texttt{lunch baked at 200 °C} \\
 \textit{Retrieved:} baked corn dogs (0.33), cheesy baked egg (0.31), fish stick batter (0.3)
 
-The degree symbol \texttt{°} is removed by the tokeniser, \texttt{200} is filtered as a digit, and \textit{lunch} is too common to discriminate. The remaining token \textit{baked} matches almost anything oven-related. The results are completely irrelevant.
+The degree symbol \texttt{°} and \texttt{200} are removed by the tokeniser, and \textit{lunch} is too common to discriminate. The remaining token \textit{baked} matches almost anything oven-related. The results are irrelevant.
 
 \paragraph{Drawback 4: Vocabulary mismatch with relevant documents.}
 \textit{Query:} \texttt{shrimp tacos recipe for tonight} \\
 \textit{Retrieved:} simple shrimp tacos (0.37), u peel em shrimp (0.34), firecracker shrimp tacos (0.32)
 
-The second result, \textit{u peel em shrimp}, has no relation to tacos. It ranks highly because \textit{shrimp} has high TF-IDF weight and dominates the score. TF-IDF cannot weigh multiple query terms jointly, a document matching only one important term can outscore others.
+The second result, \textit{u peel em shrimp}, has no relation to tacos. It ranks highly because \textit{shrimp} has high weight. TF-IDF cannot weigh multiple query terms jointly, a document matching only one important term can outscore others.
 
 \paragraph{Drawback 5: Cannot handle reasoning-based queries.}
 \textit{Query:} \texttt{cajun style gumbo with an easy roux} \\
 \textit{Retrieved:} gumbo base aka roux (0.41), double roux cajun seafood gumbo (0.4), cajun style chicken gumbo (0.39)
 
-The results are reasonable, but none directly answers the query, which is a gumbo recipe that specifically includes an easy roux method. TF-IDF retrieves documents containing the right words but cannot reason if a recipe satisfies the implied constraint of simplicity.
+TF-IDF retrieves documents containing the right words but cannot reason if a recipe satisfies the implied constraint of simplicity.
 %%% SECTION 6 %%%%
 \clearpage
 \section{Prompt Design}
@@ -286,8 +287,8 @@ Steps: \{steps\}
 
 Based only on the recipes above, answer the question concisely. [/INST]
 \end{tcolorbox}
-
-\paragraph{Comparison.}
+\newpage
+\paragraph{\\Comparison.}
 Table~\ref{tab:prompt-comparison} shows example outputs for the same query under both prompts.
 
 \begin{table}[h]
@@ -367,7 +368,7 @@ To verify the model does not use its own knowledge, I ran the same query with an
 
 \textbf{Retrieved:} {\small\ttfamily turducken thanksgiving sides, turducken roulade, turducken chicken duck turkey, turducken, umami stuffing}
 \newpage
-\textbf{With RAG context:} {\small\ttfamily A turducken is a dish consisting of a deboned turkey stuffed with a deboned duck, which in turn is stuffed with a deboned chicken. The deboning process is time-consuming and may be done the day before to save time. The turducken is then seasoned, stuffed with prepared stuffing, and slow-cooked. The recipes provide detailed instructions for deboning and assembling a turducken, as well as preparing Cajun-inspired stuffing and rice dressing.}
+\textbf{\\With RAG context:} {\small\ttfamily A turducken is a dish consisting of a deboned turkey stuffed with a deboned duck, which in turn is stuffed with a deboned chicken. The deboning process is time-consuming and may be done the day before to save time. The turducken is then seasoned, stuffed with prepared stuffing, and slow-cooked. The recipes provide detailed instructions for deboning and assembling a turducken, as well as preparing Cajun-inspired stuffing and rice dressing.}
 
 \textbf{Without context (bare LM):} {\small\ttfamily A turducken is a culinary dish that consists of a deboned turkey stuffed with a duck, which in turn is stuffed with a chicken. It is a combination of three poultry dishes in one, and is considered an intricate and indulgent holiday meal.}
 \end{tcolorbox}
