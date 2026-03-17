@@ -143,17 +143,19 @@ print("────────────────────────�
 
 # ── k sensitivity analysis  ───────────────
 # test number of retrieved docs
-print("── k sensitivity (macro F1) ────────────────────────")
+print("── k sensitivity ───────")
 for k in [3, 5, 10, 20, 50]:
-    ps, rs, fs = [], [], []
+    ps, rs, fs, aps = [], [], [], []
     for entry in answerable_queries:
-        rel = set(doc_id for doc_id, _ in entry["r"])
+        rel    = set(doc_id for doc_id, _ in entry["r"])
         ranked = retrieve_ids(entry["q"], doc_vectors, vocab, idf, bigram, k=k, threshold=0)
-        ret = [idx for _, idx in ranked]
+        ret    = [idx for _, idx in ranked]
         p, r, f1 = precision_recall_f1(ret, rel)
-        ps.append(p); rs.append(r); fs.append(f1)
+        ap = average_precision(ret, rel)
+        ps.append(p); rs.append(r); fs.append(f1); aps.append(ap)
     print(f"  k={k}  macro-F1={sum(fs)/len(fs):.4f}  "
-          f"macro-P={sum(ps)/len(ps):.4f}  macro-R={sum(rs)/len(rs):.4f}")
+          f"macro-P={sum(ps)/len(ps):.4f}  macro-R={sum(rs)/len(rs):.4f}  "
+          f"MAP={sum(aps)/len(aps):.4f}")
 print("──────────────────────────\n")
 """
 Loaded 47 queries, 41 answerable.
@@ -179,11 +181,11 @@ Loaded 47 queries, 41 answerable.
   threshold=0.40  macro-F1=0.0459  macro-P=0.0732  macro-R=0.0376
 ────────────────────────────────────────────────────────────
 
-── k sensitivity (macro F1) ────────────────────────
-  k=3  macro-F1=0.0953  macro-P=0.1626  macro-R=0.0826
-  k=5  macro-F1=0.0774  macro-P=0.1024  macro-R=0.0832
-  k=10  macro-F1=0.0798  macro-P=0.0805  macro-R=0.1148
-  k=20  macro-F1=0.0688  macro-P=0.0549  macro-R=0.1476
-  k=50  macro-F1=0.0475  macro-P=0.0307  macro-R=0.1778
+── k sensitivity ───────
+  k=3  macro-F1=0.0953  macro-P=0.1626  macro-R=0.0826  MAP=0.0531
+  k=5  macro-F1=0.0774  macro-P=0.1024  macro-R=0.0832  MAP=0.0534
+  k=10  macro-F1=0.0798  macro-P=0.0805  macro-R=0.1148  MAP=0.0618
+  k=20  macro-F1=0.0688  macro-P=0.0549  macro-R=0.1476  MAP=0.0663
+  k=50  macro-F1=0.0475  macro-P=0.0307  macro-R=0.1778  MAP=0.0701
 ──────────────────────────
 """
