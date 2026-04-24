@@ -1,0 +1,764 @@
+{
+    "queries": [
+        {
+            "q": "Which versions of the Morfessor tokenizer have been proposed in the literature?",
+            "r": [
+                "W02-0603",
+                "E14-2006",
+                "C14-1111",
+                "2020.lrec-1.486"
+            ],
+            "a": "Baseline (MDL and ML), CatMap, CatML, FlatCat, EM+Prune"
+        },
+        {
+            "q": "What is Dynamic Programming Encoding?",
+            "r": [
+                "2020.acl-main.275"
+            ],
+            "a": "A tokenizer for machine translation based on a mixed character-subword (MCS) transformer."
+        },
+        {
+            "q": "How many variants of the byte-pair encoding subword tokenizer have there been proposed?",
+            "r": [
+                "P16-1162",
+                "2023.ranlp-1.121",
+                "2020.acl-main.170",
+                "W18-1207",
+                "2021.iwslt-1.31",
+                "2021.emnlp-main.576",
+                "2023.emnlp-main.614"
+            ],
+            "a": "Roughly 6 (BPE, BPE-dropout, S-BPE, M-BPE, DLG-BPE, BBPE)"
+        },
+        {
+            "q": "Can I do topic modelling with embeddings?",
+            "r": [
+                "2020.emnlp-main.135"
+            ],
+            "a": "Yes."
+        },
+        {
+            "q": "Which paper invented additive attention?",
+            "r": [
+                "D17-1151"
+            ],
+            "a": "Bahdanau, but this paper is not on ACL Anthology so you need to obtain this information from a survey paper."
+        },
+        {
+            "q": "Which variants of BERT (Bidirectional Encoding Representations from Transformers) are known?",
+            "r": [
+                "D19-1410",
+                "2020.tacl-1.5",
+                "2021.emnlp-main.846"
+            ],
+            "a": "S-BERT, SpanBERT, PhraseBERT"
+        },
+        {
+            "q": "Of what concept are the tokenizers byte-pair encoding dropout (BPE-dropout) and unigram language model (ULM) an example?",
+            "r": [
+                "P18-1007"
+            ],
+            "a": "Subword regularization."
+        },
+        {
+            "q": "Which subword tokenizers can be trained with semi-supervised data?",
+            "r": [
+                "W10-2210",
+                "E14-2006",
+                "C14-1111",
+                "2020.lrec-1.486"
+            ],
+            "a": "Morfessor FlatCat, Morfessor EM+Prune, and an extension of Morfessor Baseline"
+        },
+        {
+            "q": "What is an open vocabulary?",
+            "r": [
+                "P16-1162"
+            ],
+            "a": "An infinite set of producible words."
+        },
+        {
+            "q": "What word categories have a potentially transparent translation, such that a segmentation into appropriate subword units is sufficient to learn transparent translations?",
+            "r": [
+                "P16-1162"
+            ],
+            "a": "Named entities, cognates, loanwords, and morphologically complex words, for instance formed via compounding, affixation, or inflection."
+        },
+        {
+            "q": "Who invented the WordPiece tokenizer?",
+            "r": [
+                "2020.findings-emnlp.414",
+                "P18-1007"
+            ],
+            "a": "Schuster and Nakajima"
+        },
+        {
+            "q": "What is vocabulary clustering?",
+            "r": [
+                "2020.emnlp-main.367"
+            ],
+            "a": ""
+        },
+        {
+            "q": "Is it a good idea to compare BLEU scores across papers?",
+            "r": [
+                "W18-6319"
+            ],
+            "a": "BLEU is a parameterized metric whose values can vary wildly with changes to its parameters, which are often not reported or are hard to find, so BLEU scores between papers cannot be directly compared."
+        },
+        {
+            "q": "Can you describe the phenomenon of non-concatenative morphology?",
+            "r": [
+                "2020.sigmorphon-1.24",
+                "2021.findings-emnlp.60"
+            ],
+            "a": "The different units of meaning within a word may be fused, intertwined, and cannot be separated linearly. Words can be affixed in such a way that makes the stem and/or affix undergo morpho-phonological changes resulting in ambiguous, syncretic word-forms which cannot be restored without morphological disambiguation of the word in context of the whole sentence. Examples are templating, vowel harmony and reduplication."
+        },
+        {
+            "q": "Is there an optimal number of BPE merge operations for transformers?",
+            "r": [
+                "W19-6620"
+            ],
+            "a": "Smaller is better."
+        },
+        {
+            "q": "What do we know about the anisotropy of contextualised embeddings?",
+            "r": [
+                "D19-1006"
+            ],
+            "a": "Contextualized representations of all words are not isotropic in any layer of the contextualizing model."
+        },
+        {
+            "q": "What are common features between S-BERT, SpanBERT and PhraseBERT?",
+            "r": [
+                "D19-1410",
+                "2020.tacl-1.5",
+                "2021.emnlp-main.846"
+            ],
+            "a": "They all train BERT with a new objective."
+        },
+        {
+            "q": "Can you build a tokenizer using the theory of optimal transport?",
+            "r": [
+                "2021.acl-long.571"
+            ],
+            "a": "Yes, VOLT."
+        },
+        {
+            "q": "Which character-based transformers have been proposed?",
+            "r": [
+                "2020.coling-main.609",
+                "2022.tacl-1.5",
+                "2022.tacl-1.17",
+                "2023.acl-long.326"
+            ],
+            "a": "CharacterBERT, CANINE, ByT5, Charformer"
+        },
+        {
+            "q": "What is the difference between ULM (Unigram LM) and SentencePiece?",
+            "r": [
+                "P18-1007",
+                "D18-2012",
+                "2020.findings-emnlp.414"
+            ],
+            "a": "ULM is a tokenization algorithm, SentencePiece is a software package that implements ULM and BPE."
+        },
+        {
+            "q": "Do we have systems that automatically split compounds into their constituents?",
+            "r": [
+                "E03-1076",
+                "W10-1734"
+            ],
+            "a": "Yes, compound splitters."
+        },
+        {
+            "q": "Which papers introduced transition-based dependency parsing?",
+            "r": [
+                "W03-3017",
+                "W04-0308",
+                "W03-3023"
+            ],
+            "a": "Yamada and Matsumodo (2003), Nivre (2003), and Nivre (2004). "
+        },
+        {
+            "q": "Which papers introduced graph-based dependency parsing?",
+            "r": [
+                "C96-1058",
+                "P05-1012",
+                "H05-1066"
+            ],
+            "a": "Though Eisner (1996) introduced the first graph-based parsing variant, the mainstream formulation of the paradigm is generally attributed to McDonald and Pereira (2005) and McDonald, et al. (2005). "
+        },
+        {
+            "q": "Has there been an analysis comparing classic transition-based and graph-based dependency parsers?",
+            "r": [
+                "D07-1013",
+                "J11-1007"
+            ],
+            "a": "McDonald and Nivre (2007) offer a comparative analysis of the transition-based and graph-based parsing paradigms. They later build on this in McDonald and Nivre (2011), where they include results from 13 languages."
+        },
+        {
+            "q": "What are some benchmarks that can measure the syntactic knowledge of a language model?",
+            "r": [
+                "2020.tacl-1.25",
+                "2020.acl-demos.10"
+            ],
+            "a": "BLiMP (The Benchmark of Linguistic Minimal Pairs for English) and SyntaxGym are two common benchmarks for evaluating language models' syntactic competence. "
+        },
+        {
+            "q": "What is a common architecture for neural dependency parsing?",
+            "r": [
+                "K17-3002"
+            ],
+            "a": "The biaffine attention parser of Dozat and Manning."
+        },
+        {
+            "q": "What system first incorporated adapters for cross-lingual dependency parsing?",
+            "r": [
+                "2020.emnlp-main.180"
+            ],
+            "a": "The UDapter achitecture uses adapters to efficiently fine-tune mBERT for multilingual and cross-lingual dependency parsing. "
+        },
+        {
+            "q": "How can I probe for dependency structure in a model's representations?",
+            "r": [
+                "N19-1419"
+            ],
+            "a": "Hewitt and Manning's structural probe is a popular model for discovering dependency structure in hidden vector representations. "
+        },
+        {
+            "q": "What is an alternative to UD for dependency annotation?",
+            "r": [
+                "W18-6008"
+            ],
+            "a": "Surface-syntactic Universal Dependencies is a dependency annotation scheme with an emphasis on function word heads. "
+        },
+        {
+            "q": "What are some common issues associated with the NLI task?",
+            "r": [
+                "N18-2017",
+                "S18-2023",
+                "P19-1334"
+            ],
+            "a": "NLI-based models have been shown to be particularly vulnerable in correlating factors like sentence length, negation, and sub-sequence overlap with entailment labels. "
+        },
+        {
+            "q": "Where can I find a discussion of the probing paradigm, including its shortcomings and disadvantages?",
+            "r": [
+                "2022.cl-1.7"
+            ],
+            "a": "Belinkov (2022) offers a survey about the probing paradigm, as applied to NLP. "
+        },
+        {
+            "q": "What is the \"attention is not explanation\" debate?",
+            "r": [
+                "N19-1357",
+                "D19-1002"
+            ],
+            "a": "The \"attention is not explanation\" debate was introduced by Jain and Wallace (2019) and Serrano and Smith (2019), who showed evidence that neural models achieved similar accuracies when informed with contrastive or random attention weights. This finding was later contested by Wiegreffe and Pinter (2019), who showed that attention can offer a \"plausible\" explanation for a model's inner workings, although  not necessarily a \"faithful\" one.   "
+        },
+        {
+            "q": "What is \"faithfulness\" in the context of interpretability?",
+            "r": [
+                "2020.acl-main.386"
+            ],
+            "a": "Faithfulness refers to how accurately a model's prediction reflects its actual decision process. "
+        },
+        {
+            "q": "What are some studies that compare saliency methods in NLP?",
+            "r": [
+                "2020.emnlp-main.263",
+                "2021.naacl-main.399",
+                "2022.emnlp-main.64"
+            ],
+            "a": "Atanasova, et al. (2020), Ding and Koehn (2021), and Bastings, et al. (2022) explore a wide range of saliency techniques within NLP. "
+        },
+        {
+            "q": "What is a recurrent neural network grammar?",
+            "r": [
+                "N16-1024"
+            ],
+            "a": "Recurrent Neural Network Grammar (RNNG) is a neural language model that models sentences via explicit sentence structure. "
+        },
+        {
+            "q": "What tasks comprise the GLUE suite?",
+            "r": [
+                "W18-5446"
+            ],
+            "a": "The GLUE benchmark is composed of CoLA (sentence acceptability judgements), SST-2 (sentiment analysis), MRPC (paraphrase detection), STS-2 (sentence similarity judgements), QQP (paraphrase detection), MNLI, QNLI, RTE, and WNLI (NLI variants). "
+        },
+        {
+            "q": "What is item response theory? Has it been applied to NLP?",
+            "r": [
+                "2021.acl-long.346",
+                "2021.acl-long.92"
+            ],
+            "a": "Item response theory is a statistical framework from psychometrics that is widely used for the evaluation of test items in educational assessment. It has been used to measure the difficulty of NLP tests with respect to an individual model class. "
+        },
+        {
+            "q": "Why is the Japanese GSD treebank so easy to parse?",
+            "r": [
+                "W17-0411",
+                "2023.eacl-main.76"
+            ],
+            "a": "The Japanese GSD treebank features a tokenization scheme that splits words into morpheme-like units. Since these units can often be deterministically attached to their lexical root, dependency parsers trained on this treebank obtain high accuracies on such relations. "
+        },
+        {
+            "q": "What is Targeted Syntactic Evaluation?",
+            "r": [
+                "Q16-1037",
+                "N18-1108",
+                "D18-1151"
+            ],
+            "a": "Targerted Syntactic Evaluation is a method for evaluating the syntactic knowledge of language by models by measuring the probability they assign to syntactic minimal pairs."
+        },
+        {
+            "q": "What are negative polarity items?",
+            "r": [
+                "W18-5424"
+            ],
+            "a": "Negative polarity items (NPI) are a class of words that bear the special feature that they need to be licensed by a specific licensing context. For example: \"any\" is a negative polarity item: \"He didn\u2019t buy any books\" is correct, while \"He did buy any books\" is not. "
+        },
+        {
+            "q": "Are NLP models like BERT sensitive to word order? ",
+            "r": [
+                "2021.acl-long.569",
+                "2022.findings-acl.293",
+                "2021.emnlp-main.230"
+            ],
+            "a": "It has been shown that BERT-based models are typically not sensitive to word order when fine-tuned on various classification-based tasks. However, this has less to do with the underlying language model, and more with the task on which it is fine-tuned. "
+        },
+        {
+            "q": "What are common syntactic annotation schemes?",
+            "r": [
+                "2021.cl-2.11",
+                "2020.lrec-1.497",
+                "W18-6008",
+                "N19-1020"
+            ],
+            "a": "Universal Dependencies (UD), Combinatory Categorial Grammar (CCG), Surface-Syntactic Universal Dependencies (SUD)"
+        },
+        {
+            "q": "What are common semantic annotation schemes?",
+            "r": [
+                "P13-1023",
+                "E17-2039",
+                "W13-2322"
+            ],
+            "a": "Universal Conceptual Cognitive Annotation (UCCA), Discourse Representation Structures (DRS), Abstract Meaning Representation (AMR)"
+        },
+        {
+            "q": "What are universals?",
+            "r": [
+                "J19-3005",
+                "2021.quasy-1.3"
+            ],
+            "a": "A (linguistic) property that tends to be valid across languages."
+        },
+        {
+            "q": "Which databased can I use to analyse typological information?",
+            "r": [
+                "2020.sigtyp-1.4",
+                "E17-2002",
+                "2023.sigtyp-1.17",
+                "2023.findings-emnlp.82"
+            ],
+            "a": "World Atlas of Linguistic Structes (WALS), URIEL, Grambank."
+        },
+        {
+            "q": "What is the purpose of language embeddings?",
+            "r": [
+                "2023.nodalida-1.67",
+                "2021.acl-long.560",
+                "J19-2006"
+            ],
+            "a": "They can be used to: help transfer learning, improve multilingual NLP tasks such as machine translation, adapt larger models to new languages, make sure that similar languages are represented similarly."
+        },
+        {
+            "q": "What technique can be used to try to explain the inner workings of a language model?",
+            "r": [
+                "2022.cl-1.7"
+            ],
+            "a": "Probing."
+        },
+        {
+            "q": "What is weak supervision?",
+            "r": [
+                "2021.emnlp-main.393",
+                "2023.acl-long.796",
+                "2023.acl-long.327"
+            ],
+            "a": "Techniques to make use of limited or noisy (labeled) data and/or additional signals to train a model."
+        },
+        {
+            "q": "What is the name of the first Dutch transformer-based pre-trained language model?",
+            "r": [
+                "2020.findings-emnlp.292",
+                "2020.findings-emnlp.389"
+            ],
+            "a": "BERTje."
+        },
+        {
+            "q": "What is BERTology?",
+            "r": [
+                "2020.tacl-1.54"
+            ],
+            "a": "A field of study that tries to understand how BERT works, what it learns, what it internally represents."
+        },
+        {
+            "q": "What is the name of the research initiative creating resources for African languages?",
+            "r": [
+                "2023.acl-long.796",
+                "2023.acl-long.609",
+                "2023.ijcnlp-main.10"
+            ],
+            "a": "Masakhane. (Masakha is also fine.)"
+        },
+        {
+            "q": "What is the WMT conference about?",
+            "r": [
+                "2023.wmt-1.0"
+            ],
+            "a": "Machine Translation."
+        },
+        {
+            "q": "How many tasks did SemEval 2022 have?",
+            "r": [
+                "2022.semeval-1.0"
+            ],
+            "a": "12"
+        },
+        {
+            "q": "What is the modular and parameter-efficient alternative to fine-tuning called?",
+            "r": [
+                "2023.emnlp-demo.13"
+            ],
+            "a": "Adapters."
+        },
+        {
+            "q": "In what task does post-editing play a role?",
+            "r": [
+                "2021.emnlp-main.801",
+                "2022.emnlp-main.532"
+            ],
+            "a": "In machine translation."
+        },
+        {
+            "q": "Are certain researchers critical of parsing?",
+            "r": [
+                "P07-1051",
+                "2021.eacl-main.270"
+            ],
+            "a": "Yes."
+        },
+        {
+            "q": "What measure has been proposed to stimulate research in multilingual NLP?",
+            "r": [
+                "2022.emnlp-main.351"
+            ],
+            "a": "To ban English for a year."
+        },
+        {
+            "q": "What dataset can I use to test multilingual information retrieval?",
+            "r": [
+                "2023.tacl-1.63",
+                "2023.mrl-1.21",
+                "2020.emnlp-main.340"
+            ],
+            "a": "MIRACL, Multi-EuP, CLIRMatrix"
+        },
+        {
+            "q": "Is the impact of big tech on NLP growing?",
+            "r": [
+                "2023.acl-long.734"
+            ],
+            "a": "Yes, it has increased a lot in recent years and is still growing."
+        },
+        {
+            "q": "What are drawbacks of character-level machine translation?",
+            "r": [
+                "2022.findings-acl.194",
+                "2020.acl-main.145"
+            ],
+            "a": "Slow training compared to subwords, generally lacking behind performance of using subwords in robustness and morphological generalization."
+        },
+        {
+            "q": "What is the BabyLM Challenge?",
+            "r": [
+                "2023.conll-babylm.1"
+            ],
+            "a": "A challenge to train a language model on the same amount of data that a human child sees on average to learn a language."
+        },
+        {
+            "q": "What does preregistration mean in research?",
+            "r": [
+                "2021.naacl-main.51"
+            ],
+            "a": "It is the practice of specifying what you are going to do, and what you expect to find in your study, before carrying out the study."
+        },
+        {
+            "q": "How can a transition-based parser deal with non-projectivity?",
+            "r": [
+                "P05-1013",
+                "P09-1040"
+            ],
+            "a": "Using pseudo-projective parsing, or using a swap operation"
+        },
+        {
+            "q": "How is the input represented in a delexicalized dependency parser?",
+            "r": [
+                "I08-3008",
+                "D11-1006"
+            ],
+            "a": "Using POS tags of the words"
+        },
+        {
+            "q": "What are called parsing oracles that are non-deterministic?",
+            "r": [
+                "Q13-1033"
+            ],
+            "a": "Dyanmic oracles"
+        },
+        {
+            "q": "What are the four transitions of an arc-eager dependency parser?",
+            "r": [
+                "J08-4003",
+                "C12-1059"
+            ],
+            "a": "left-arc, right-arc, reduce, shift"
+        },
+        {
+            "q": "What languages did the CoNLL 2006 shared task include?",
+            "r": [
+                "W06-2920"
+            ],
+            "a": "Arabic, Chinese, Czech, Danish, Dutch, German, Japanese, Polish, Slovene, Swedish, Turkish"
+        },
+        {
+            "q": "What was the input of the CoNLL 2017 shared task?",
+            "r": [
+                "K17-3001v2"
+            ],
+            "a": "raw (unnanotated) text"
+        },
+        {
+            "q": "What dataset can be used for multilingual natural language inference?",
+            "r": [
+                "D18-1269"
+            ],
+            "a": "XNLI"
+        },
+        {
+            "q": "What are visual dependency relations?",
+            "r": [
+                "D13-1128"
+            ],
+            "a": "spatial relations between pairs of image regions"
+        },
+        {
+            "q": "How can the digital status of languages be categorized?",
+            "r": [
+                "2020.acl-main.560"
+            ],
+            "a": "The left-behinds, the scraping-bys, the hopefuls, the rising stars, the underdogs, the winners"
+        },
+        {
+            "q": "What toolkit can be used to easily fine-tune contextualized embeddings in a multi-task setting?",
+            "r": [
+                "2021.eacl-demos.22"
+            ],
+            "a": "MaChAmp"
+        },
+        {
+            "q": "What is the name of the statistical machine translation toolkit developed by Philip Koehn and colleagues?",
+            "r": [
+                "P07-2045"
+            ],
+            "a": "Moses"
+        },
+        {
+            "q": "What kind of encoder can be used to incorporate syntactic structure into a neural machine translation system?",
+            "r": [
+                "D17-1209"
+            ],
+            "a": "A graph convolutional encoder"
+        },
+        {
+            "q": "Who developed ELMo?",
+            "r": [
+                "N18-1202"
+            ],
+            "a": "Matthew Peters, Mark Neumann, Mohit Iyyer, Matt Gardner, Christopher Clark, Kenton Lee and Luke Zettlemoyer"
+        },
+        {
+            "q": "What is a diagnostic classifier?",
+            "r": [
+                "2020.cl-2.4"
+            ],
+            "a": "A probing task which uses representations generated from a fully trained model with frozen weights to train a classifier predicting a particular linguistic property."
+        },
+        {
+            "q": "Can LSTMs learn syntactic dependencies?",
+            "r": [
+                "P18-1132"
+            ],
+            "a": "Yes"
+        },
+        {
+            "q": "Which teams participated in the Americas 2021 shared task?",
+            "r": [
+                "2021.americasnlp-1.23"
+            ],
+            "a": "CoAStaL, Helsinki, NRC-CNRC, REPUcs, Tamalli, UBC-NLP and UTokyo"
+        },
+        {
+            "q": "Which team ranked first in the CoNLL 2018 shared task based on the LAS score",
+            "r": [
+                "K18-2001v2"
+            ],
+            "a": "HIT-SCIR"
+        },
+        {
+            "q": "Who developed Udify?",
+            "r": [
+                "D19-1279"
+            ],
+            "a": "Dan Kondratyuk and Milan Straka"
+        },
+        {
+            "q": "How can masked language models be evaluated intrinsically?",
+            "r": [
+                "2020.acl-main.240"
+            ],
+            "a": "Via pseudo-perplexity"
+        },
+        {
+            "q": "What are some relevant benchmarks for code-mixed NLP?",
+            "r": [
+                "2020.acl-main.329",
+                "2020.lrec-1.223"
+            ],
+            "a": "GlueCoS, Lince"
+        },
+        {
+            "q": "What are some multilingual pretrained language models for Indic languages?",
+            "r": [
+                "2020.findings-emnlp.445",
+                "2023.acl-long.693"
+            ],
+            "a": "IndicBERT"
+        },
+        {
+            "q": "What are some multilingual pretrained models for African languages?",
+            "r": [
+                "2021.mrl-1.11",
+                "2022.coling-1.382",
+                "2022.sustainlp-1.11"
+            ],
+            "a": "AfriBERTa, AfroXLMR, AfroLM"
+        },
+        {
+            "q": "What are some datasets you can use to probe models for linguistic information? ",
+            "r": [
+                "P18-1198",
+                "2020.cl-2.4",
+                "W19-4318"
+            ],
+            "a": "SentEval, Linspector, Xprobe"
+        },
+        {
+            "q": "Can you transliterate languages for better language modelling?",
+            "r": [
+                "2023.findings-eacl.50"
+            ],
+            "a": "Yes, it has shown to improve downstream performance, especially for low-resource languages"
+        },
+        {
+            "q": "What are some surveys on approaches to code-switched NLP?",
+            "r": [
+                "2023.findings-acl.185",
+                "2021.acl-long.131"
+            ],
+            "a": "Do\u011fru\u00f6z, et al (2021) talk about sociolinguistic approaches to language technologies. Winata, et al. (2023) give an overview of a decade of research on code-switching."
+        },
+        {
+            "q": "What are some feature attribution metrics for language model interpretability ",
+            "r": [
+                "N16-3020",
+                "2022.coling-1.406 "
+            ],
+            "a": "LIME, SHAP"
+        },
+        {
+            "q": "What are natural language understanding benchmarks for Indic languages",
+            "r": [
+                "2020.findings-emnlp.445",
+                "2023.acl-long.693"
+            ],
+            "a": "IndicGLUE, IndicXTREME"
+        },
+        {
+            "q": "What is a toolkit for easy multi-task finetuning of models?",
+            "r": [
+                "2021.eacl-demos.22"
+            ],
+            "a": "Massive Choice, Ample Tasks (MaChAmp)"
+        },
+        {
+            "q": "How much data is required to adapt a BERT model to another language of the same family?",
+            "r": [
+                "2021.findings-acl.433"
+            ],
+            "a": "About 10Mb."
+        },
+        {
+            "q": "What is the optimal size of character n-grams for training a French FastText model?",
+            "r": [
+                "2021.ranlp-1.120"
+            ],
+            "a": "6 characters"
+        },
+        {
+            "q": "Did anyone ever explore corrupting BPE tokenization at training time to improve test time generalization?",
+            "r": [
+                "2020.acl-main.170"
+            ],
+            "a": "Yes, the authors of BPE-Dropout did (Ivan Provilkov, Dmitrii Emelianenko, and Elena Voita)."
+        },
+        {
+            "q": "When were the synonym relationships found in biomedical ontologies used to train an entity linking model for the first time?",
+            "r": [
+                "2020.acl-main.335"
+            ],
+            "a": "In 2020, by the authors of BioSyn (Mujeen Sung, Hwisang Jeon, Jinhyuk Lee, and Jaewoo Kang)."
+        },
+        {
+            "q": "What method was developed to perform zero-shot entity linking for the biomedical domain in the absence of definitions for all concepts?",
+            "r": [
+                "2022.findings-emnlp.61"
+            ],
+            "a": "KRISSBERT"
+        },
+        {
+            "q": "Which dataset could one use to train models to predict whether certain statements are entailed or contradicted by the patient history?",
+            "r": [
+                "D18-1187"
+            ],
+            "a": "MedNLI"
+        },
+        {
+            "q": "What technique did Nils Reimers and Iryna Gurevych use to train multilingual semantic models in 2020?",
+            "r": [
+                "2020.emnlp-main.365"
+            ],
+            "a": "Knowledge Distillation"
+        },
+        {
+            "q": "How can someone detect whether a sentence contains an idiomatic expression, or an expression used figuratively?",
+            "r": [
+                "2021.tacl-1.92"
+            ],
+            "a": "Using Semantic Compatibility,"
+        }
+    ]
+}
