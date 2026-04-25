@@ -1,22 +1,219 @@
 import argparse
+
 from part2_data import build_sample_if_missing, load_anthology, load_queries, answerable_queries
 from neural_retrieval import NeuralIndex
-from long_docs import ChunkedIndex, top_chunks_for_prompt
 from part2_metrics import evaluate_neural, evaluate_ranked_lists, compare_table
+from tf_idf import tokenize_docs, train_bigram_model, build_vocab, vectorize, vectorize_query, dot_sparse
+
+MODEL_NAME = "sentence-transformers/all-mpnet-base-v2"
+EVAL_K = 10
+FULL_TEXT_TRUNC_WORDS = 220
+
 
 def _banner(label, eta):
     print(f"\n[Part 2] {label}  (~{eta})")
 
-def run_part2_all(model, tokenizer):
-    build_sample_if_missing()                         # ~10 s if cached
+
+def _truncate_words(text, max_words=FULL_TEXT_TRUNC_WORDS):
+    words = str(text or "").split()
+    if len(words) <= max_words:
+        return " ".join(words)
+    return " ".join(words[:max_words])
+
+
+def _title_abstract_fulltext_truncated(doc, max_words=FULL_TEXT_TRUNC_WORDS):
+    parts = []
+
+    title = str(doc.get("title", "") or "").strip()
+    if title:
+        parts.append(title)
+
+    abstract = str(doc.get("abstract", "") or "").strip()
+    if abstract:
+        parts.append(abstract)
+
+    full_text = _truncate_words(doc.get("full_text", ""), max_words=max_words)
+    if full_text:
+        parts.append(full_text)
+
+    return "\n".join(parts)
+
+
+def _paper_title_abstract_text(doc):
+    title = str(doc.get("title", "") or "").strip()
+    abstract = str(doc.get("abstract", "") or "").strip()
+    return f"{title} {abstract}".strip()
+
+
+def run_tfidf_acl_baseline(anthology, queries, k=EVAL_K):
+    """Part 2 lexical baseline on ACL papers using title+abstract fields."""
+    print("[Part 2][1/6] TF-IDF baseline on ACL (title+abstract, k=10) (~1 min CPU)")
+
+    doc_texts = [_paper_title_abstract_text(doc) for doc in anthology]
+    tokenized_docs = tokenize_docs(doc_texts)
+    bigram = train_bigram_model(tokenized_docs)
+    tokenized_docs = [bigram[tokens] for tokens in tokenized_docs]
+    vocab, idf, _ = build_vocab(tokenized_docs, min_df=5, max_df_ratio=0.5, max_vocab=50000)
+    doc_vectors = [vectorize(tokens, vocab, idf) for tokens in tokenized_docs]
+
+    ranked_acl_lists = []
+    for entry in queries:
+        query_vec = vectorize_query(entry["q"], bigram, vocab, idf)
+        if not query_vec:
+            ranked_acl_lists.append([])
+            continue
+
+        scores = [(dot_sparse(query_vec, vec), idx) for idx, vec in enumerate(doc_vectors)]
+        scores.sort(reverse=True)
+        top_indices = [idx for _, idx in scores[:k]]
+        ranked_acl_lists.append([str(anthology[idx].get("acl_id", "")) for idx in top_indices])
+
+    metrics = evaluate_ranked_lists(ranked_acl_lists, queries, k=k)
+    print(
+        "[TF-IDF] title+abstract: "
+        f"MAP@10={metrics['MAP@10']:.4f} "
+        f"macro_F1={metrics['macro_F1']:.4f} "
+        f"micro_F1={metrics['micro_F1']:.4f}"
+    )
+    return metrics
+
+
+def _print_subword_demo(index):
+    tokenizer = getattr(index.encoder, "tokenizer", None)
+    if tokenizer is None:
+        print("[Neural] Tokenizer demo unavailable (encoder has no tokenizer attribute).")
+        return
+
+    word = "Morfessor"
+    pieces = tokenizer.tokenize(word)
+    print(f"[Neural] Subword demo for '{word}': {pieces}")
+
+
+def run_neural_baseline(
+    anthology,
+    queries,
+    model_name=MODEL_NAME,
+    device=None,
+    k=EVAL_K,
+):
+    """
+    Part 2 step 1: neural baseline + field experiment.
+
+    Field variants:
+      1) title only
+      2) title + abstract (baseline)
+      3) title + abstract + truncated full_text
+    """
+    print("[Part 2][1/6] neural baseline + field experiment (~4 min on T4)")
+    print(f"[Neural] Docs: {len(anthology)} | Queries: {len(queries)} | k={k}")
+
+    tfidf_metrics = run_tfidf_acl_baseline(anthology, queries, k=k)
+
+    # ~2 min on T4
+    baseline_index = NeuralIndex(
+        model_name=model_name,
+        fields=("title", "abstract"),
+        device=device,
+    )
+    baseline_index.build(anthology)
+    baseline_metrics = evaluate_neural(baseline_index, queries, k=k)
+    print(
+        "[Neural] Baseline (title+abstract): "
+        f"MAP@10={baseline_metrics['MAP@10']:.4f} "
+        f"macro_F1={baseline_metrics['macro_F1']:.4f} "
+        f"micro_F1={baseline_metrics['micro_F1']:.4f}"
+    )
+    print("[Part 2] Retrieval comparison on ACL (as requested in Q1):")
+    compare_table(
+        {
+            "TF-IDF (title+abstract)": tfidf_metrics,
+            "Neural (title+abstract)": baseline_metrics,
+        }
+    )
+
+    # Reuse loaded encoder to avoid re-downloading/re-loading weights.
+    shared_encoder = baseline_index.encoder
+
+    title_only_index = NeuralIndex(
+        model_name=model_name,
+        fields=("title",),
+        encoder=shared_encoder,
+    )
+    title_only_index.build(anthology)
+    title_only_metrics = evaluate_neural(title_only_index, queries, k=k)
+
+    title_abs_full_index = NeuralIndex(
+        model_name=model_name,
+        fields=("title", "abstract"),
+        encoder=shared_encoder,
+        text_builder=_title_abstract_fulltext_truncated,
+    )
+    title_abs_full_index.build(anthology)
+    title_abs_full_metrics = evaluate_neural(title_abs_full_index, queries, k=k)
+
+    print("[Neural] Field experiment results:")
+    compare_table(
+        {
+            "title only": title_only_metrics,
+            "title+abstract (baseline)": baseline_metrics,
+            "title+abstract+full_text_truncated": title_abs_full_metrics,
+        }
+    )
+
+    _print_subword_demo(baseline_index)
+    return baseline_index
+
+
+def run_long_docs(*args, **kwargs):
+    print("[Part 2] Long-doc step not implemented yet.")
+
+
+def run_query_rewriting(*args, **kwargs):
+    print("[Part 2] Query-rewriting step not implemented yet.")
+
+
+def run_hyde(*args, **kwargs):
+    print("[Part 2] HyDE step not implemented yet.")
+
+
+def run_prompt_engineering(*args, **kwargs):
+    print("[Part 2] Prompt-engineering step not implemented yet.")
+
+
+def run_metadata_probe(*args, **kwargs):
+    print("[Part 2] Metadata probe step not implemented yet.")
+
+
+def run_data_step():
+    """Debug convenience: build cache and print quick dataset/query stats."""
+    build_sample_if_missing()
     anthology = load_anthology()
-    queries   = answerable_queries(load_queries())
+    queries = load_queries()
+    ans = answerable_queries(queries)
+
+    print(f"[Part 2][data] anthology docs: {len(anthology)}")
+    if len(anthology) > 0:
+        print(f"[Part 2][data] first acl_id: {anthology[0].get('acl_id')}")
+    print(f"[Part 2][data] queries: {len(queries)} | answerable: {len(ans)}")
+
+
+def run_neural_step():
+    build_sample_if_missing()  # ~10 s if cached
+    anthology = load_anthology()
+    queries = answerable_queries(load_queries())
+    return run_neural_baseline(anthology, queries)
+
+
+def run_part2_all(model=None, tokenizer=None):
+    build_sample_if_missing()  # ~10 s if cached
+    anthology = load_anthology()
+    queries = answerable_queries(load_queries())
 
     _banner("Neural baseline + field experiment", "4 min on T4")
-    index = run_neural_baseline(anthology, queries)   # returns NeuralIndex
+    index = run_neural_baseline(anthology, queries)  # returns NeuralIndex
 
     _banner("Long documents (chunked index + LM stuffing)", "10 min on T4")
-    chunked = run_long_docs(anthology, queries, index, model, tokenizer)
+    run_long_docs(anthology, queries, index, model, tokenizer)
 
     _banner("Query rewriting (single + RRF-3, RRF-5)", "20 min on T4")
     run_query_rewriting(index, queries, model, tokenizer)
@@ -30,21 +227,21 @@ def run_part2_all(model, tokenizer):
     _banner("Metadata probe (no LM)", "30 s")
     run_metadata_probe(index)
 
+
 STEPS = {
-    "data":     lambda m=None, t=None: build_sample_if_missing(),
-    "neural":   run_neural_baseline,
-    "long":     run_long_docs,
-    "rewrite":  run_query_rewriting,
-    "hyde":     run_hyde,
-    "prompt":   run_prompt_engineering,
+    "data": lambda m=None, t=None: run_data_step(),
+    "neural": lambda m=None, t=None: run_neural_step(),
+    "long": run_long_docs,
+    "rewrite": run_query_rewriting,
+    "hyde": run_hyde,
+    "prompt": run_prompt_engineering,
     "metadata": run_metadata_probe,
-    "all":      run_part2_all,
+    "all": run_part2_all,
 }
 
-if __name__ == "__main__":   # debug convenience — NOT the reproduction path
-    import argparse
+
+if __name__ == "__main__":  # debug convenience — NOT the reproduction path
     ap = argparse.ArgumentParser()
     ap.add_argument("--step", choices=list(STEPS), default="all")
     args = ap.parse_args()
-    # Lazy-load the LM only for steps that need it.
     STEPS[args.step]()

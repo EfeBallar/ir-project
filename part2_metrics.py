@@ -27,7 +27,7 @@ def _empty_scores():
         "micro_P": 0.0,
         "micro_R": 0.0,
         "micro_F1": 0.0,
-        "MAP": 0.0,
+        "MAP@10": 0.0,
     }
 
 
@@ -64,7 +64,7 @@ def _extract_acl_id(item):
 
 
 def _compute_from_ranked_ids(ranked_ids_per_query, queries, k=10):
-    """Compute macro/micro P,R,F1 and MAP from ranked ACL-id lists."""
+    """Compute macro/micro P,R,F1 and MAP@10 from ranked ACL-id lists."""
     if not queries:
         return _empty_scores()
 
@@ -104,7 +104,7 @@ def _compute_from_ranked_ids(ranked_ids_per_query, queries, k=10):
         "micro_P": micro_p,
         "micro_R": micro_r,
         "micro_F1": micro_f1,
-        "MAP": sum(aps) / n,
+        "MAP@10": sum(aps) / n,
     }
 
 
@@ -176,7 +176,7 @@ def compare_table(results_by_name):
 
     Expected input:
       {
-        "baseline": {"macro_P": ..., "macro_R": ..., ... "MAP": ...},
+        "baseline": {"macro_P": ..., "macro_R": ..., ... "MAP@10": ...},
         "variant":  {...},
       }
     """
@@ -187,11 +187,11 @@ def compare_table(results_by_name):
         "micro_P",
         "micro_R",
         "micro_F1",
-        "MAP",
+        "MAP@10",
     ]
 
     lines = [
-        "| System | macro_P | macro_R | macro_F1 | micro_P | micro_R | micro_F1 | MAP |",
+        "| System | macro_P | macro_R | macro_F1 | micro_P | micro_R | micro_F1 | MAP@10 |",
         "|---|---:|---:|---:|---:|---:|---:|---:|",
     ]
 
