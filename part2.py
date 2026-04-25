@@ -2,6 +2,7 @@ import argparse
 
 from part2_data import build_sample_if_missing, load_anthology, load_queries, answerable_queries
 from neural_retrieval import NeuralIndex
+from long_docs import ChunkedIndex, StructuredChunkedIndex
 from part2_metrics import evaluate_neural, evaluate_ranked_lists, compare_table
 from tf_idf import tokenize_docs, train_bigram_model, build_vocab, vectorize, vectorize_query, dot_sparse
 
@@ -164,8 +165,77 @@ def run_neural_baseline(
     return baseline_index
 
 
-def run_long_docs(*args, **kwargs):
-    print("[Part 2] Long-doc step not implemented yet.")
+def run_long_docs(
+    anthology,
+    queries,
+    baseline_index=None,
+    model_name=MODEL_NAME,
+    device=None,
+    k=EVAL_K,
+):
+    """Part 2 step 2: IR overlapping word windows chunking + IR structure-aware chunking w/sections and paragraphs"""
+    print("[Part 2][2/6] long documents: two IR methods")
+
+    if baseline_index is None:
+        baseline_index = NeuralIndex(
+            model_name=model_name,
+            fields=("title", "abstract"),
+            device=device,
+        )
+        baseline_index.build(anthology)
+
+    baseline_metrics = evaluate_neural(baseline_index, queries, k=k)
+
+    # Method 1: fixed overlapping windows + max pooling
+    # ~6 min on T4
+    chunked_index = ChunkedIndex(
+        model_name=model_name,
+        encoder=baseline_index.encoder,
+        max_words=220,
+        overlap=40,
+    )
+    chunked_index.build(anthology)
+    chunked_metrics = evaluate_neural(chunked_index, queries, k=k)
+
+    # Method 2: structure-aware chunking + top-n aggregation
+    # ~6 min on T4
+    structured_index = StructuredChunkedIndex(
+        model_name=model_name,
+        encoder=baseline_index.encoder,
+        max_words=220,
+        min_words=80,
+        target_words=180,
+        top_n=3,
+        aggregation="weighted",
+    )
+    structured_index.build(anthology)
+    structured_metrics = evaluate_neural(structured_index, queries, k=k)
+
+    print("[LongDocs][IR] whole-doc vs two long-doc methods:")
+    compare_table(
+        {
+            "whole-doc neural (title+abstract)": baseline_metrics,
+            "method-1: fixed windows + max": chunked_metrics,
+            "method-2: structured + top3 weighted": structured_metrics,
+        }
+    )
+
+    map_delta_1 = chunked_metrics["MAP@10"] - baseline_metrics["MAP@10"]
+    f1_delta_1 = chunked_metrics["macro_F1"] - baseline_metrics["macro_F1"]
+    map_delta_2 = structured_metrics["MAP@10"] - baseline_metrics["MAP@10"]
+    f1_delta_2 = structured_metrics["macro_F1"] - baseline_metrics["macro_F1"]
+    print(
+        "[LongDocs][IR] Delta method-1 vs whole-doc: "
+        f"MAP@10={map_delta_1:+.4f}, "
+        f"macro_F1={f1_delta_1:+.4f}"
+    )
+    print(
+        "[LongDocs][IR] Delta method-2 vs whole-doc: "
+        f"MAP@10={map_delta_2:+.4f}, "
+        f"macro_F1={f1_delta_2:+.4f}"
+    )
+
+    return structured_index
 
 
 def run_query_rewriting(*args, **kwargs):
@@ -197,6 +267,24 @@ def run_data_step():
     print(f"[Part 2][data] queries: {len(queries)} | answerable: {len(ans)}")
 
 
+def run_long_step():
+    """Debug convenience: run long-doc step without loading the LLM."""
+    build_sample_if_missing()  # ~10 s if cached
+    anthology = load_anthology()
+    queries = answerable_queries(load_queries())
+
+    baseline_index = NeuralIndex(
+        model_name=MODEL_NAME,
+        fields=("title", "abstract"),
+    )
+    baseline_index.build(anthology)
+    return run_long_docs(
+        anthology,
+        queries,
+        baseline_index=baseline_index
+    )
+
+
 def run_neural_step():
     build_sample_if_missing()  # ~10 s if cached
     anthology = load_anthology()
@@ -212,8 +300,8 @@ def run_part2_all(model=None, tokenizer=None):
     _banner("Neural baseline + field experiment", "4 min on T4")
     index = run_neural_baseline(anthology, queries)  # returns NeuralIndex
 
-    _banner("Long documents (chunked index + LM stuffing)", "10 min on T4")
-    run_long_docs(anthology, queries, index, model, tokenizer)
+    _banner("Long documents (chunked index + LM stuffing)", "20 min on T4")
+    run_long_docs(anthology, queries, index)
 
     _banner("Query rewriting (single + RRF-3, RRF-5)", "20 min on T4")
     run_query_rewriting(index, queries, model, tokenizer)
@@ -231,7 +319,7 @@ def run_part2_all(model=None, tokenizer=None):
 STEPS = {
     "data": lambda m=None, t=None: run_data_step(),
     "neural": lambda m=None, t=None: run_neural_step(),
-    "long": run_long_docs,
+    "long": lambda m=None, t=None: run_long_step(),
     "rewrite": run_query_rewriting,
     "hyde": run_hyde,
     "prompt": run_prompt_engineering,
