@@ -367,3 +367,10 @@ The chicken Wellington recipe in Recipe 1 states to preheat the oven to 180c / 1
 ── With scores ──
 The recipe with the highest relevance score, Recipe 1, specifies that the oven should be preheated to 180c / 160c fan forced for baking chicken Wellington.
 """
+
+  if __name__ == "__main__":
+      print("[Part 1/2] running Part 1 experiments (~6 min on T4)")
+      run_part1_experiments()
+      print("[Part 2/2] running Part 2 experiments (~60 min on T4)")
+      from part2 import run_part2_all
+      run_part2_all(model=model, tokenizer=tokenizer)
