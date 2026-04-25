@@ -43,6 +43,7 @@ tokenized_docs = tokenize_docs(doc_texts)
 bigram         = train_bigram_model(tokenized_docs)
 tokenized_docs = [bigram[doc] for doc in tokenized_docs]
 vocab, idf, df = build_vocab(tokenized_docs, min_df=5, max_df_ratio=0.5, max_vocab=50000)
+# ~30 s on T4
 doc_vectors    = [vectorize(tokens, vocab, idf) for tokens in tokenized_docs]
 print("Indexing complete.\n")
 
@@ -148,12 +149,7 @@ def generate(prompt, max_new_tokens=300):
     answer = decoded[0].split("[/INST]")[-1].strip()
     return answer
 
-# ── Experiment 1: Compare prompt variants ────────────────────────────────────
-# Assignment bullet 6: "Give two or more sets of instructions"
-print("EXPERIMENT 1 — Prompt variant comparison")
-print("═" * 70)
-
-# Queries to use for qualitative LLM analysis
+# Queries to use for qualitative LLM analysis (Part 1)
 DEMO_QUERIES = [
     "What temperature should I pre-heat my oven to when making chicken quesadillas?",
     "What is the most important ingredient in borscht?",
@@ -162,45 +158,7 @@ DEMO_QUERIES = [
     "Is beef Wellington the only kind of meaty Wellington? If not, what other kinds do you know?",
 ]
 
-for query in DEMO_QUERIES[:3]:   # run on first 3 queries to save time
-    retrieved = retrieve(query, k=K_GENERATION)
-    print(f"\nQuery: {query}")
-    print(f"Retrieved: {[doc.get('name') for _, doc in retrieved]}\n")
-    for variant_name, prompt_fn in PROMPT_VARIANTS.items():
-        prompt = prompt_fn(query, retrieved)
-        answer = generate(prompt)
-        print(f"── Prompt {variant_name} ──")
-        print(f"{answer}\n")
-    print("-" * 70)
-
-# ── Experiment 2: Does LM understand the RAG task? ───────────────────────────
-# Assignment bullet 7: "Does the LM understand the RAG task?"
-# Test: give it irrelevant recipes and see if it says it can't answer
-print("EXPERIMENT 2 — Does the LM understand the RAG task?")
-print("  (feeding irrelevant recipes — LM should say it cannot answer)")
-print("═" * 70)
-
-# Experiment 2: feed completely irrelevant non-recipe context
-test_query = "What temperature should I bake chicken Wellington at?"
-irrelevant_context = """
-Richard Gary Brautigan (January 30, 1935 – c. September 16, 1984)
-was an American novelist, poet, and short story writer. A prolific writer,
-he wrote throughout his life and published ten novels, two collections of
-short stories, and four books of poetry...
-"""
-# use their provided irrelevant context instead of wrong recipes
-prompt = f"<s>[INST] Answer the following question using only the provided context.\n\nQuestion: {test_query}\n\nContext:\n{irrelevant_context}\n\nAnswer: [/INST]"
-answer = generate(prompt)
-print(f"Query: {test_query}")
-print(f"LM response:\n{answer}")
-
-# ── Experiment 3: Reasoning queries (not just recipe retrieval) ───────────────
-# Assignment bullet 7: "queries that require reasoning across recipes"
-# All 5 must NOT be of the form "recommend me recipes"
-print("EXPERIMENT 3 — Reasoning queries")
-print("═" * 70)
-
-reasoning_queries = [
+REASONING_QUERIES = [
     "What temperature should I pre-heat my oven to when making chicken quesadillas?",
     "What is the most important ingredient in borscht?",
     "Is beef Wellington the only kind of meaty Wellington? If not, what other kinds do you know?",
@@ -208,51 +166,105 @@ reasoning_queries = [
     "What are the three essential ingredients in a baked Alaska?",
 ]
 
-for query in reasoning_queries:
-    retrieved = retrieve(query, k=K_GENERATION)
-    prompt    = prompt_b(query, retrieved)
-    answer    = generate(prompt)
-    print(f"\nQuery: {query}")
+
+def run_part1_experiments():
+    # ── Experiment 1: Compare prompt variants ────────────────────────────────
+    # Assignment bullet 6: "Give two or more sets of instructions"
+    print("[Part 1][Step 1/5] Prompt variant comparison (~3 min on T4)")
+    print("EXPERIMENT 1 — Prompt variant comparison")
+    print("═" * 70)
+
+    # ~3 min on T4
+    for query in DEMO_QUERIES[:3]:   # run on first 3 queries to save time
+        retrieved = retrieve(query, k=K_GENERATION)
+        print(f"\nQuery: {query}")
+        print(f"Retrieved: {[doc.get('name') for _, doc in retrieved]}\n")
+        for variant_name, prompt_fn in PROMPT_VARIANTS.items():
+            prompt = prompt_fn(query, retrieved)
+            answer = generate(prompt)
+            print(f"── Prompt {variant_name} ──")
+            print(f"{answer}\n")
+        print("-" * 70)
+
+    # ── Experiment 2: Does LM understand the RAG task? ───────────────────────
+    # Assignment bullet 7: "Does the LM understand the RAG task?"
+    # Test: give it irrelevant recipes and see if it says it can't answer
+    print("[Part 1][Step 2/5] RAG understanding check (~30 s on T4)")
+    print("EXPERIMENT 2 — Does the LM understand the RAG task?")
+    print("  (feeding irrelevant recipes — LM should say it cannot answer)")
+    print("═" * 70)
+
+    # Experiment 2: feed completely irrelevant non-recipe context
+    test_query = "What temperature should I bake chicken Wellington at?"
+    irrelevant_context = """
+Richard Gary Brautigan (January 30, 1935 – c. September 16, 1984)
+was an American novelist, poet, and short story writer. A prolific writer,
+he wrote throughout his life and published ten novels, two collections of
+short stories, and four books of poetry...
+"""
+    # use their provided irrelevant context instead of wrong recipes
+    prompt = f"<s>[INST] Answer the following question using only the provided context.\n\nQuestion: {test_query}\n\nContext:\n{irrelevant_context}\n\nAnswer: [/INST]"
+    answer = generate(prompt)
+    print(f"Query: {test_query}")
+    print(f"LM response:\n{answer}")
+
+    # ── Experiment 3: Reasoning queries (not just recipe retrieval) ──────────
+    # Assignment bullet 7: "queries that require reasoning across recipes"
+    # All 5 must NOT be of the form "recommend me recipes"
+    print("[Part 1][Step 3/5] Reasoning queries (~2 min on T4)")
+    print("EXPERIMENT 3 — Reasoning queries")
+    print("═" * 70)
+
+    # ~2 min on T4
+    for query in REASONING_QUERIES:
+        retrieved = retrieve(query, k=K_GENERATION)
+        prompt = prompt_b(query, retrieved)
+        answer = generate(prompt)
+        print(f"\nQuery: {query}")
+        print(f"Retrieved: {[doc.get('name') for _, doc in retrieved]}")
+        print(f"Answer: {answer}")
+        print("-" * 70)
+
+    # ── Experiment 4: Does LM use supplied recipes or its own knowledge? ─────
+    # Assignment bullet 7: "Verify LM is basing its answer on supplied recipes"
+    # Method: compare answer with correct recipes vs. answer with no context
+    print("[Part 1][Step 4/5] Grounding check (~30 s on T4)")
+    print("EXPERIMENT 4 — Grounding check (RAG vs. no context)")
+    print("═" * 70)
+
+    grounding_query = "What is a turducken?"
+
+    # ~30 s on T4
+    # With correct retrieved context
+    retrieved = retrieve(grounding_query, k=K_GENERATION)
+    answer_with_context = generate(prompt_b(grounding_query, retrieved))
+
+    # Without any context (bare LM knowledge)
+    bare_prompt = f"<s>[INST] {grounding_query} [/INST]"
+    answer_without_context = generate(bare_prompt)
+
+    print(f"\nQuery: {grounding_query}")
     print(f"Retrieved: {[doc.get('name') for _, doc in retrieved]}")
-    print(f"Answer: {answer}")
-    print("-" * 70)
+    print(f"\n── With RAG context ──\n{answer_with_context}")
+    print(f"\n── Without context (bare LM) ──\n{answer_without_context}")
 
-# ── Experiment 4: Does LM use supplied recipes or its own knowledge? ──────────
-# Assignment bullet 7: "Verify LM is basing its answer on supplied recipes"
-# Method: compare answer with correct recipes vs. answer with no context
-print("EXPERIMENT 4 — Grounding check (RAG vs. no context)")
-print("═" * 70)
+    # ── Experiment 5: Score sensitivity ──────────────────────────────────────
+    # Assignment bullet 7: "Do you notice significant changes when you include scores?"
+    print("[Part 1][Step 5/5] Score sensitivity (~30 s on T4)")
+    print("EXPERIMENT 5 — Score sensitivity")
+    print("═" * 70)
 
-grounding_query = "What is a turducken?"
+    score_query = "What temperature should I bake chicken Wellington at?"
 
-# With correct retrieved context
-retrieved = retrieve(grounding_query, k=K_GENERATION)
-answer_with_context = generate(prompt_b(grounding_query, retrieved))
+    # ~30 s on T4
+    retrieved = retrieve(score_query, k=K_GENERATION)
+    answer_no_scores = generate(prompt_b(score_query, retrieved))
+    answer_with_scores = generate(prompt_b_with_scores(score_query, retrieved))
 
-# Without any context (bare LM knowledge)
-bare_prompt = f"<s>[INST] {grounding_query} [/INST]"
-answer_without_context = generate(bare_prompt)
-
-print(f"\nQuery: {grounding_query}")
-print(f"Retrieved: {[doc.get('name') for _, doc in retrieved]}")
-print(f"\n── With RAG context ──\n{answer_with_context}")
-print(f"\n── Without context (bare LM) ──\n{answer_without_context}")
-
-# ── Experiment 5: Score sensitivity ──────────────────────────────────────────
-# Assignment bullet 7: "Do you notice significant changes when you include scores?"
-print("EXPERIMENT 5 — Score sensitivity")
-print("═" * 70)
-
-score_query = "What temperature should I bake chicken Wellington at?"
-retrieved   = retrieve(score_query, k=K_GENERATION)
-
-answer_no_scores   = generate(prompt_b(score_query, retrieved))
-answer_with_scores = generate(prompt_b_with_scores(score_query, retrieved))
-
-print(f"\nQuery: {score_query}")
-print(f"Scores: {[round(s, 3) for s, _ in retrieved]}")
-print(f"\n── Without scores ──\n{answer_no_scores}")
-print(f"\n── With scores ──\n{answer_with_scores}")
+    print(f"\nQuery: {score_query}")
+    print(f"Scores: {[round(s, 3) for s, _ in retrieved]}")
+    print(f"\n── Without scores ──\n{answer_no_scores}")
+    print(f"\n── With scores ──\n{answer_with_scores}")
 
 """
 EXPERIMENT 1 — Prompt variant comparison
@@ -368,9 +380,10 @@ The chicken Wellington recipe in Recipe 1 states to preheat the oven to 180c / 1
 The recipe with the highest relevance score, Recipe 1, specifies that the oven should be preheated to 180c / 160c fan forced for baking chicken Wellington.
 """
 
-  if __name__ == "__main__":
-      print("[Part 1/2] running Part 1 experiments (~6 min on T4)")
-      run_part1_experiments()
-      print("[Part 2/2] running Part 2 experiments (~60 min on T4)")
-      from part2 import run_part2_all
-      run_part2_all(model=model, tokenizer=tokenizer)
+if __name__ == "__main__":
+    print("[Part 1/2] running Part 1 experiments (~6 min on T4)")
+    run_part1_experiments()
+    print("[Part 2/2] running Part 2 experiments (~60 min on T4)")
+    from part2 import run_part2_all
+
+    run_part2_all(model=model, tokenizer=tokenizer)

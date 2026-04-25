@@ -16,8 +16,7 @@ for six clusters of extensions (AGENTS.md §2.2):
 4. HyDE (hypothetical document embeddings)
 5. Prompt engineering (citations, abstention, instruction hardening)
 6. Metadata (design question + diagnostic evidence)
-
-Plus a closing "3 things we learnt" reflection.
+7. "3 things we learnt" reflection.
 
 The Part 2 dataset has a *different schema* from Part 1 (string `acl_id`,
 `abstract`, `full_text`, `year`, `author`, `title`) and a *different query JSON
@@ -152,21 +151,17 @@ identical.
   if __name__ == "__main__":
       print("[Part 1/2] running Part 1 experiments (~6 min on T4)")
       run_part1_experiments()
-      print("[Part 2/2] running Part 2 experiments (~60–90 min on T4)")
+      print("[Part 2/2] running Part 2 experiments (~60 min on T4)")
       from part2 import run_part2_all
       run_part2_all(model=model, tokenizer=tokenizer)
   ```
-- The existing trailing docstring with sample outputs stays (useful as ground
-  truth).
+- The existing trailing docstring with sample outputs stays (useful as ground truth).
 
 ### `part2_data.py`
 - `DATA_PATH = "./anthology_sample.parquet"`.
-- `build_sample_if_missing()` runs the existing `part2.py` logic (seeded shuffle
-  + concat of query-relevant + 2000 random docs) only when the parquet is
-  absent. Keeps Colab reruns cheap.
+- `build_sample_if_missing()` runs the existing `part2.py` logic (seeded shuffle + concat of query-relevant + 2000 random docs) only when the parquet is absent. Keeps Colab reruns cheap.
 - `load_anthology()` returns the `datasets.Dataset`.
-- `load_queries()` returns the parsed JSON; each entry has `q` (str), `r`
-  (list[str]), `a` (str).
+- `load_queries()` returns the parsed JSON; each entry has `q` (str), `r` (list[str]), `a` (str).
 - `answerable_queries(queries)` filters to `len(r) > 0`.
 
 ### `neural_retrieval.py`
@@ -208,15 +203,9 @@ identical.
 - `class ChunkedIndex(NeuralIndex)`:
   - `build(dataset)`: chunks each doc, encodes all chunks, records
     `chunk_to_doc: list[int]`.
-  - `retrieve(query, k)`: scores all chunks → max-pool per-doc → rank docs by
-    doc-level score → top-k.
-- `top_chunks_for_prompt(query, paper_ids, k_chunks=3)`: given a set of paper
-  ids, returns the top-3 most query-relevant chunks concatenated per paper, for
-  use in LM prompts that can't fit full papers.
-- Experiment: run `evaluate_neural(ChunkedIndex, ...)` and compare against
-  whole-doc (title+abstract) index → demonstrates IR improvement. Also run one
-  LM-generation comparison (full abstract vs selective chunks for a full-text
-  query) to show the LM side.
+  - `retrieve(query, k)`: scores all chunks → max-pool per-doc → rank docs by doc-level score → top-k.
+- `top_chunks_for_prompt(query, paper_ids, k_chunks=3)`: given a set of paper ids, returns the top-3 most query-relevant chunks concatenated per paper, for use in LM prompts that can't fit full papers.
+- Experiment: run `evaluate_neural(ChunkedIndex, ...)` and compare against whole-doc (title+abstract) index → demonstrates IR improvement. Also run one LM-generation comparison (full abstract vs selective chunks for a full-text query) to show the LM side.
 
 ### `query_rewriting.py`
 - `REWRITE_PROMPT = """..."""`: Mistral-compatible `[INST]` prompt that asks
@@ -333,14 +322,10 @@ if __name__ == "__main__":   # debug convenience — NOT the reproduction path
 
 Each `run_*` function:
 - Prints a `[N/M] step-name (~ETA)` banner at the start.
-- Builds any per-step indices it needs (reuses the cached `NeuralIndex` from
-  the neural step where sensible — passed through as an argument).
+- Builds any per-step indices it needs (reuses the cached `NeuralIndex` from the neural step where sensible — passed through as an argument).
 - Runs the experiments prescribed by AGENTS.md §2.2.
 - Prints a comparison table and a few qualitative examples.
 
-### `requirements.txt`
-Add: `sentence-transformers`, `bitsandbytes`, `accelerate`, `pyarrow`.
-No `scikit-learn` needed (dot products on normalized numpy arrays suffice).
 
 ## What gets delivered per AGENTS.md bullet
 
@@ -378,8 +363,8 @@ No `scikit-learn` needed (dot products on normalized numpy arrays suffice).
 Primary reproduction path — one command:
 
 - **Full reproduction:** `python main.py` → runs Part 1 experiments then Part 2
-  `run_part2_all`. Expected runtime on a T4 GPU: **~65–95 min total** (Part 1
-  ~6 min + Part 2 ~60–90 min). Progress banners announce each step with its
+  `run_part2_all`. Expected runtime on a T4 GPU: **~65 min total** (Part 1
+  ~6 min + Part 2 ~60 min). Progress banners announce each step with its
   ETA.
 
 Debug / iteration path (not required for reproduction):
@@ -477,7 +462,7 @@ after §7 Qualitative Analysis (LM) and before the bibliography:
 
 Additional edits to the template:
 - Update `\timespent{<code hours>}{<other hours>}` on line 9 of
-  `IRSE-template.tex` to reflect Part 1 + Part 2 cumulative hours. Placeholder
+  `IRSE-template.tex` by 5 hours more to reflect Part 1 + Part 2 cumulative hours. Placeholder
   values go in during implementation; the user fills real numbers before
   submission.
 - Extend `pre/references.bib` as needed with: sentence-transformers / MPNet,
