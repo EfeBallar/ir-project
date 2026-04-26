@@ -6,11 +6,10 @@
 \input{pre/bibliography}
 \begin{document}
 \author{Efe Ballar (r1072381)}
-\timespent{10 hours}{8 hours}
+\timespent{16 hours}{8 hours}
 \twocolumn[\maketitle]
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-\section{Architecture}
+\section*{Part 1: Architecture}
 
 \begin{figure*}[!t]
     \centering
@@ -60,7 +59,7 @@ Combines the original query with the $k$ retrieved recipes into a structured pro
 \paragraph{Mistral-7B-Instruct.}
 An instruction-tuned language model \parencite{jiang_mistral_2023} that generates a natural-language answer conditioned on the prompt.
 %%%%%% SECTION 2 %%%%
-\section{Term Vocabulary}
+\section*{Part 1: Term Vocabulary}
 
 \paragraph{Which terms enter $V$? }
 The vocabulary $V$ is derived from the corpus rather than fixed. Every token surviving the preprocessing pipeline is a candidate term. Candidates are then filtered: a term $t$ is admitted to $V$ only if
@@ -81,7 +80,7 @@ where $N$ is the total number of tokens in the corpus and $\delta = 3.0$ is the 
 
 %%% SECTION 3 %%%%
 \newpage
-\section{Document Embeddings}
+\section*{Part 1: Document Embeddings}
 \label{sec:embeddings}
 
 \paragraph{Field selection.}
@@ -120,7 +119,7 @@ If every term in the query is absent from $V$, the query vector is the zero vect
 
 %%% SECTION 4 %%%%
 \newpage
-\section{Retrieval}
+\section*{Part 1: Retrieval}
 \label{sec:retrieval}
 
 \paragraph{Similarity operator.}
@@ -205,7 +204,7 @@ $|R_j|$ is the total number of relevant documents for query $q_j$; $K$ is the to
 
 %%% SECTION 5 %%%%
 \newpage
-\section{Qualitative Analysis (TF-IDF)}
+\section*{Part 1: TF-IDF Analysis}
 
 \label{sec:qualitative-ir}
 
@@ -241,7 +240,7 @@ The second result, \textit{u peel em shrimp}, has no relation to tacos. It ranks
 TF-IDF retrieves documents containing the right words but cannot reason if a recipe satisfies the implied constraint of simplicity.
 %%% SECTION 6 %%%%
 \clearpage
-\section{Prompt Design}
+\section*{Part 1: Prompt Design}
 \label{sec:prompt}
 
 \paragraph{Chat template.}
@@ -309,7 +308,7 @@ B & Based on the provided recipes, one common ingredient among all recipes is be
 Prompt A enumerates each recipe individually, however the role assignment and explicit instruction to reason across recipes produces meaningfully better output, making Prompt B the template used for all subsequent experiments.
 %%% SECTION 7 %%%%
 \clearpage
-\section{Qualitative Analysis (LM)}
+\section*{Part 1: LM Analysis}
 \label{sec:qualitative-lm}
 
 All experiments in this section are run via \texttt{main.py} using Prompt~B as the default template and $k=5$ retrieved recipes, $k$ is kept smaller than the evaluation value of 10 to avoid exceeding the language model's context window.
@@ -389,6 +388,35 @@ Tested if including retrieval scores in the prompt changes the model's output (E
 \end{tcolorbox}
 
 Including retrieval scores has no significant effect on answer quality for this system.
+\clearpage
+\section*{Part 2: Neural document embeddings}
+\section*{Part 2: Long documents}
+\section*{Part 2: Query rewriting}
+\section*{Part 2: Hypothetical document embeddings (HyDE)}
+\section*{Part 2: Prompt engineering}
+\clearpage
+\section*{Part 2: Metadata (author, dates)}
+The system can't right now \emph{reliably} answer questions involving author names, publication dates and venues. Currently retrieval is primarily based on semantic embeddings of title and abstract. I do not currently build a dedicated index over metadata fields such as author names, publication year, or venue. Therefore, the system may occasionally answer such questions if the metadata happens to appear in the paper text, but this is not a robust capability.
+
+To support author-related questions, the IR subsystem can be extended in following two ways:
+
+\begin{itemize}
+\item Index with separate searchable fields for authors, venue, and year, alongside the existing semantic paper-text index. Query analysis would detect if the user mentions a person, venue, or year, and then combine exact metadata matching or filtering with semantic retrieval.
+\item Mapping from author names to paper IDs, possibly with alias normalization for initials, punctuation, and name variants. This would let the system retrieve candidate papers directly from the author mention and then rerank them using the current neural retriever on title/abstract/full text.
+\end{itemize}
+
+To answer questions about \textbf{connections between authors}, I would model the collection as a small graph rather than only as independent documents. A simple version is with author nodes and paper nodes, with edges meaning \emph{authored}. From this graph, the system could answer direct-connection questions by finding shared papers, and indirect-connection questions by finding short paths through coauthors. This can be extended with venue and year nodes, so the system could answer questions such as ``How are A and B connected?'', or ``What papers link author X to author Y?'' The retrieved graph evidence would then be passed to the LM for explanation.
+
+\section*{Conclusion}
+This project taught me three key lessons:
+
+\begin{itemize}
+  \item \textit{Retrieval quality depends strongly on representation and document granularity.} In Part 1, even a ``simple'' TF-IDF system was sensitive to field choice, vocabulary construction, and multi-word expressions. In Part 2, the same lesson held for dense retrieval: using title+abstract worked better than naively adding truncated full text, and structure-aware chunking of full papers improved retrieval further. This taught me that retrieval performance is often determined more by how documents are represented than by the model name alone.
+
+  \item \textit{LM-generated intermediate text can help retrieval, but not every LM-based idea helps.} In Part 2, query rewriting did not improve retrieval because rewrites could drift away from the original information need. By contrast, HyDE improved retrieval substantially, showing that a hypothetical document can be a better dense-retrieval query than the raw question. This taught me that LMs are useful only when the generated text matches the role we want it to play.
+
+  \item \textit{RAG systems need control and evaluation, not just good-looking outputs.} Prompt engineering part showed me that citation behavior, abstention, and resistance to prompt injection must be checked with strict validators. I also learned that some question types, such as metadata or author-connection questions, require architectural support in the IR system instead of hoping that semantic retrieval alone will solve them.
+\end{itemize}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newpage
