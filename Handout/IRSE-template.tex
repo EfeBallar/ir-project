@@ -404,7 +404,7 @@ To isolate prompt behavior from retrieval noise, I used fixed gold-supported pap
 Three prompts: \texttt{prompt\_cite}, \texttt{prompt\_abstain}, and \texttt{prompt\_hardened}. All share a strict grounding contract: use only provided papers, cite only allowed ACL IDs in square brackets, and if unsupported, say exactly.
 \begin{table}[h]
 \centering
-\caption{Part 2 prompt-engineering compliance summary.}
+\caption{Prompt-engineering compliance.}
 \label{tab:prompt2-summary}
 \begin{tabular}{lc}
 \hline
@@ -421,7 +421,7 @@ Injection hardening & 2/2 \\
 Two fixed answerable queries were tested with fixed supporting papers:
 \begin{itemize}
 \item \textit{What technique can be used to try to explain the inner workings of a language model?} with \texttt{[2022.cl-1.7]}
-\item \textit{What are some benchmarks that can measure the syntactic knowledge of a language model?} with \texttt{[2020.tacl-1.25]} and \texttt{[2020.acl-demos.10]}
+\item \textit{What are some benchmarks that can measure the syntactic knowledge of a language model?} with \texttt{[2020.tacl-1.25]}, \texttt{[2020.acl-demos.10]}
 \end{itemize}
 Both outputs were classified as valid grounded answers with only valid ACL citations.
 
@@ -431,8 +431,8 @@ Both outputs were classified as valid grounded answers with only valid ACL citat
 \textbf{Q2 Answer:} \small\ttfamily The papers [2020.tacl-1.25] and [2020.acl-demos.10] propose benchmarks for evaluating the linguistic knowledge of language models, specifically focusing on syntax, morphology, and semantics in [2020.tacl-1.25], and making targeted evaluations accessible through the SyntaxGym platform in [2020.acl-demos.10].
 \end{tcolorbox}
 
-\paragraph{2) Abstention when unsupported.}
-I evaluated two answerable queries and one clearly unanswerable query (FIFA World Cup 2018) with fixed irrelevant context. Results satisfied the exact output contract: answerable cases produced grounded cited answers; the unanswerable case produced the exact abstention string.
+\paragraph{\\2) Abstention when unsupported.}
+Evaluated two answerable queries and one clearly unanswerable query (FIFA World Cup 2018) with fixed irrelevant context. Results satisfied the exact output contract: answerable cases produced grounded cited answers; the unanswerable case produced the exact abstention string.
 
 \begin{tcolorbox}[title=Abstention outputs, fontupper=\raggedright, breakable]
 \textbf{Answerable:} \small\ttfamily Probing classifiers are a technique used to explain the inner workings of a language model [2022.cl-1.7].
@@ -454,8 +454,6 @@ In both cases, the model did not follow the override, preserved grounding, and u
 \textbf{Attack 2 Answer:} \small\ttfamily Probing classifiers, as described in [2022.cl-1.7], are a methodology used to analyze and interpret deep neural network models of natural language processing by training a classifier to predict a linguistic property from the model's representations.
 \end{tcolorbox}
 
-Overall, this experiment shows that strict prompt contracts plus strict output validation can make citation, abstention, and injection-resistance behavior much more reliable.
-
 \clearpage
 \section*{Part 2: Metadata (author, dates)}
 The system can't right now \emph{reliably} answer questions involving author names, publication dates and venues. Currently retrieval is primarily based on semantic embeddings of title and abstract. I do not currently build a dedicated index over metadata fields such as author names, publication year, or venue. Therefore, the system may occasionally answer such questions if the metadata happens to appear in the paper text, but this is not a robust capability.
@@ -469,6 +467,7 @@ To support author-related questions, the IR subsystem can be extended in followi
 
 To answer questions about \textbf{connections between authors}, I would model the collection as a small graph rather than only as independent documents. A simple version is with author nodes and paper nodes, with edges meaning \emph{authored}. From this graph, the system could answer direct-connection questions by finding shared papers, and indirect-connection questions by finding short paths through coauthors. This can be extended with venue and year nodes, so the system could answer questions such as ``How are A and B connected?'', or ``What papers link author X to author Y?'' The retrieved graph evidence would then be passed to the LM for explanation.
 
+\newpage
 \section*{Conclusion}
 This project taught me three key lessons:
 
