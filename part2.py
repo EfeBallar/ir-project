@@ -5,6 +5,7 @@ from neural_retrieval import NeuralIndex
 from long_docs import ChunkedIndex, StructuredChunkedIndex
 from part2_metrics import evaluate_neural, evaluate_ranked_lists, compare_table
 from query_rewriting import rewrite_query, rrf_fuse
+from hyde import hyde_retrieve
 from tf_idf import tokenize_docs, train_bigram_model, build_vocab, vectorize, vectorize_query, dot_sparse
 
 MODEL_NAME = "sentence-transformers/all-mpnet-base-v2"
@@ -296,7 +297,82 @@ def run_query_rewriting(index=None, queries=None, model=None, tokenizer=None, k=
 
 
 def run_hyde(*args, **kwargs):
-    print("[Part 2] HyDE step not implemented yet.")
+    index = kwargs.get("index")
+    queries = kwargs.get("queries")
+    model = kwargs.get("model")
+    tokenizer = kwargs.get("tokenizer")
+    k = kwargs.get("k", EVAL_K)
+
+    if index is None and len(args) > 0:
+        index = args[0]
+    if queries is None and len(args) > 1:
+        queries = args[1]
+    if model is None and len(args) > 2:
+        model = args[2]
+    if tokenizer is None and len(args) > 3:
+        tokenizer = args[3]
+
+    print("[Part 2][4/6] HyDE: hypothetical abstract retrieval")
+
+    if model is None or tokenizer is None:
+        print("[HyDE] skipped: model/tokenizer not provided.")
+        return None
+
+    if queries is None:
+        queries = answerable_queries(load_queries())
+
+    if index is None:
+        anthology = load_anthology()
+        index = NeuralIndex(model_name=MODEL_NAME, fields=("title", "abstract"))
+        index.build(anthology)
+
+    baseline_ranked_lists = []
+    hyde_ranked_lists = []
+    sample_hypothesis = None
+    sample_query = None
+
+    for i, entry in enumerate(queries):
+        query = entry["q"]
+
+        base_ranked = index.retrieve(query, k=k)
+        baseline_ranked_lists.append(index.acl_ids([idx for _, idx in base_ranked]))
+
+        if i == 0:
+            hyde_ids, hypothesis = hyde_retrieve(
+                query,
+                index,
+                model=model,
+                tokenizer=tokenizer,
+                k=k,
+                return_hypothesis=True,
+            )
+            sample_query = query
+            sample_hypothesis = hypothesis
+        else:
+            hyde_ids = hyde_retrieve(
+                query,
+                index,
+                model=model,
+                tokenizer=tokenizer,
+                k=k,
+            )
+
+        hyde_ranked_lists.append(hyde_ids)
+
+    results = {
+        "neural baseline": evaluate_ranked_lists(baseline_ranked_lists, queries, k=k),
+        "HyDE": evaluate_ranked_lists(hyde_ranked_lists, queries, k=k),
+    }
+
+    print("[HyDE] Retrieval results:")
+    compare_table(results)
+
+    if sample_query is not None and sample_hypothesis is not None:
+        print("[HyDE] Sample hypothetical abstract")
+        print(f"Query: {sample_query}")
+        print(sample_hypothesis)
+
+    return results
 
 
 def run_prompt_engineering(*args, **kwargs):
@@ -345,6 +421,19 @@ def run_neural_step():
     return run_neural_baseline(anthology, queries)
 
 
+def run_hyde_step():
+    """Debug convenience: run HyDE end-to-end with lazy LM load."""
+    build_sample_if_missing()  # ~10 s if cached
+    anthology = load_anthology()
+    queries = answerable_queries(load_queries())
+
+    index = NeuralIndex(model_name=MODEL_NAME, fields=("title", "abstract"))
+    index.build(anthology)
+
+    model, tokenizer = _load_part2_lm()
+    return run_hyde(index=index, queries=queries, model=model, tokenizer=tokenizer)
+
+
 def run_part2_all(model=None, tokenizer=None):
     build_sample_if_missing()  # ~10 s if cached
     anthology = load_anthology()
@@ -374,7 +463,7 @@ STEPS = {
     "neural": lambda m=None, t=None: run_neural_step(),
     "long": lambda m=None, t=None: run_long_step(),
     "rewrite": run_query_rewriting,
-    "hyde": run_hyde,
+    "hyde": lambda m=None, t=None: run_hyde_step(),
     "prompt": run_prompt_engineering,
     "metadata": run_metadata_probe,
     "all": run_part2_all,
