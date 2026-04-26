@@ -4,6 +4,7 @@ from part2_data import build_sample_if_missing, load_anthology, load_queries, an
 from neural_retrieval import NeuralIndex
 from long_docs import ChunkedIndex, StructuredChunkedIndex
 from part2_metrics import evaluate_neural, evaluate_ranked_lists, compare_table
+from query_rewriting import rewrite_query, rrf_fuse
 from tf_idf import tokenize_docs, train_bigram_model, build_vocab, vectorize, vectorize_query, dot_sparse
 
 MODEL_NAME = "sentence-transformers/all-mpnet-base-v2"
@@ -105,7 +106,7 @@ def run_neural_baseline(
       2) title + abstract (baseline)
       3) title + abstract + truncated full_text
     """
-    print("[Part 2][1/6] neural baseline + field experiment (~4 min on T4)")
+    print("[Part 2][1/6] neural baseline + field experiment + compare against TF-IDF (~4 min on T4)")
     print(f"[Neural] Docs: {len(anthology)} | Queries: {len(queries)} | k={k}")
 
     tfidf_metrics = run_tfidf_acl_baseline(anthology, queries, k=k)
@@ -238,8 +239,60 @@ def run_long_docs(
     return structured_index
 
 
-def run_query_rewriting(*args, **kwargs):
-    print("[Part 2] Query-rewriting step not implemented yet.")
+def run_query_rewriting(index=None, queries=None, model=None, tokenizer=None, k=EVAL_K):
+    """Part 2 step 3: query rewriting (single rewrite + RRF-3)."""
+    print("[Part 2][3/6] query rewriting: original vs 1-rewrite vs RRF-3")
+
+    if model is None or tokenizer is None:
+        print("[Rewrite] skipped: model/tokenizer not provided.")
+        return None
+
+    if queries is None:
+        queries = answerable_queries(load_queries())
+
+    if index is None:
+        anthology = load_anthology()
+        index = NeuralIndex(model_name=MODEL_NAME, fields=("title", "abstract"))
+        index.build(anthology)
+
+    original_ranked_lists = []
+    single_rewrite_ranked_lists = []
+    rrf3_ranked_lists = []
+
+    for i, entry in enumerate(queries):
+        query = entry["q"]
+
+        original_ranked = index.retrieve(query, k=k)
+        original_ids = index.acl_ids([idx for _, idx in original_ranked])
+        original_ranked_lists.append(original_ids)
+
+        rewrites = rewrite_query(query, n=3, model=model, tokenizer=tokenizer)
+        rewrite_ranked_lists = []
+        for rewritten_query in rewrites:
+            rewritten_ranked = index.retrieve(rewritten_query, k=k)
+            rewrite_ranked_lists.append(index.acl_ids([idx for _, idx in rewritten_ranked]))
+
+        single_rewrite_ranked_lists.append(rewrite_ranked_lists[0] if rewrite_ranked_lists else original_ids)
+
+        rrf3_inputs = [original_ids] + rewrite_ranked_lists[:3]
+        if len(rrf3_inputs) > 1:
+            rrf3_ranked_lists.append(rrf_fuse(rrf3_inputs, k=k))
+        else:
+            rrf3_ranked_lists.append(original_ids)
+
+        if i < 2:
+            print(f"[Rewrite][sample {i+1}] query: {query}")
+            print(f"[Rewrite][sample {i+1}] rewrites: {rewrites}")
+
+    results = {
+        "original": evaluate_ranked_lists(original_ranked_lists, queries, k=k),
+        "1 rewrite": evaluate_ranked_lists(single_rewrite_ranked_lists, queries, k=k),
+        "RRF-3": evaluate_ranked_lists(rrf3_ranked_lists, queries, k=k),
+    }
+
+    print("[Rewrite] Retrieval results:")
+    compare_table(results)
+    return results
 
 
 def run_hyde(*args, **kwargs):
@@ -303,7 +356,7 @@ def run_part2_all(model=None, tokenizer=None):
     _banner("Long documents (chunked index + LM stuffing)", "20 min on T4")
     run_long_docs(anthology, queries, index)
 
-    _banner("Query rewriting (single + RRF-3, RRF-5)", "20 min on T4")
+    _banner("Query rewriting (single + RRF-3)", "20 min on T4")
     run_query_rewriting(index, queries, model, tokenizer)
 
     _banner("HyDE (98 hypothetical abstracts)", "15 min on T4")

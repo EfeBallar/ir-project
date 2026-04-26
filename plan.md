@@ -211,7 +211,7 @@ identical.
 - `REWRITE_PROMPT = """..."""`: Mistral-compatible `[INST]` prompt that asks
   for N alternative queries, one per line, with no preamble. Prompt spells out
   the target domain (NLP papers) and asks for mix of (a) paraphrase, (b)
-  terminology expansion, (c) decomposition into narrower sub-queries.
+  terminology expansion, (c) synonym replacement in the NLP domain.
 - `rewrite_query(query, n=3, lm=lm)`: formats prompt, calls `lm.generate`,
   parses output — splits on newlines, strips numbering/bullets, drops empties,
   returns first N cleaned strings.
@@ -220,8 +220,8 @@ identical.
 - Experiments:
   1. Retrieve with original query — baseline.
   2. Retrieve with single rewrite — compare MAP.
-  3. Retrieve with N=3 rewrites fused via RRF — compare MAP.
-- Output: MAP/F1 table across {original, 1 rewrite, RRF-3, RRF-5}.
+  3. Retrieve with N=3 rewrites fused via RRF — compare MAP@10.
+- Output: MAP/F1 table across {original, 1 rewrite, RRF-3}.
 
 ### `hyde.py`
 - `HYDE_PROMPT`: Mistral-compatible prompt asking the LM to "write a short
@@ -379,7 +379,7 @@ Debug / iteration path (not required for reproduction):
 3. **Long documents:** `python part2.py --step long` — prints MAP for whole-
    doc vs chunked index; shows one before/after LM answer.
 4. **Query rewriting:** `python part2.py --step rewrite` — MAP table for
-   {original, 1-rewrite, RRF-3, RRF-5}; prints 2 sample rewrites.
+   {original, 1-rewrite, RRF-3}; prints 2 sample rewrites.
 5. **HyDE:** `python part2.py --step hyde` — HyDE MAP vs neural baseline; one
    full hypothetical-abstract example.
 6. **Prompt engineering:** `python part2.py --step prompt` — 3 citation
