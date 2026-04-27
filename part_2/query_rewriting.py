@@ -1,9 +1,6 @@
 """Query rewriting helpers for Part 2 retrieval experiments."""
 
-import re
-
-import torch
-
+import re, torch
 
 REWRITE_PROMPT = (
     "<s>[INST] You rewrite user search questions for retrieval over NLP research papers. "

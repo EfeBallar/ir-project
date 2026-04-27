@@ -1,6 +1,6 @@
 """Part 2 retrieval evaluation helpers (ACL anthology)."""
 
-from metrics import average_precision, precision_recall_f1
+from part_1.metrics import average_precision, precision_recall_f1
 
 
 def _as_query_list(gold_queries):

@@ -145,16 +145,3 @@ What we expect to receive from you:
 
 3. **1 ZIP** of all Python code you implemented, organised in `.py` files, named `IRSE-code-r0123456.zip`. Jupyter notebooks will not be accepted. Make sure that it is clear what should be run to reproduce all the results found in your report (e.g., one central file `main.py` that imports functions from other files). We encourage you to annotate calls that take a long time with a time estimate.
 
----
-
-## 5 Deadlines
-
-We expect all your deliverables by **Sunday, May 17th 2026, at 6 AM**. That means: the latest regular submission is at 05:59:59 Sunday morning.
-
-Toledo submissions past the deadline are possible. In that case, your grade $g \in \{0, 0.5, 1, 1.5, \ldots, 19, 19.5, 20\}$ will be adjusted using the following function of the (fractional) amount of hours $x \geq 0$ you are late:
-
-$$g_\text{adj}(x, g) = \begin{cases} \dfrac{1}{2} \left\lfloor 2 \cdot \min\!\left(g;\; \max\!\left(10;\; g - \dfrac{x}{p} \cdot 2^p \cdot (g-10)^{p-1}\right)\right) \right\rfloor & (x \leq 24) \\[6pt] 0 & (x > 24) \end{cases}$$
-
-with $p = 1.5$. This formula is designed in your favour such that if your project is worth a passing grade, you cannot fail the project by submitting up to 24 hours after the deadline. After 24 hours, we count you as having done zero work, which means you get a 0/20 and your presentation time slot will be cancelled.
-
-Beware that there is **no resit** for the project in August; whatever project grade you receive in June will be kept even if you retake the exam. This is in line with the course's ECTS card.

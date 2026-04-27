@@ -2,7 +2,6 @@
 
 ABSTAIN_RESPONSE = "Based on the provided papers, I cannot answer this."
 
-
 def _allowed_ids(retrieved_papers):
     ids = []
     for paper in retrieved_papers:

@@ -8,7 +8,7 @@ from part2_metrics import evaluate_neural, evaluate_ranked_lists, compare_table
 from query_rewriting import rewrite_query, rrf_fuse
 from hyde import hyde_retrieve
 from prompt_engineering import prompt_cite, prompt_abstain, prompt_hardened, ABSTAIN_RESPONSE
-from tf_idf import tokenize_docs, train_bigram_model, build_vocab, vectorize, vectorize_query, dot_sparse
+from part_1.tf_idf import tokenize_docs, train_bigram_model, build_vocab, vectorize, vectorize_query, dot_sparse
 
 MODEL_NAME = "sentence-transformers/all-mpnet-base-v2"
 EVAL_K = 10
@@ -685,10 +685,6 @@ def run_prompt_engineering(*args, **kwargs):
     }
 
 
-def run_metadata_probe(*args, **kwargs):
-    print("[Part 2] Metadata probe step not implemented yet.")
-
-
 def run_data_step():
     """Debug convenience: build cache and print quick dataset/query stats."""
     build_sample_if_missing()
@@ -740,7 +736,7 @@ def run_hyde_step():
     return run_hyde(index=index, queries=queries, model=model, tokenizer=tokenizer)
 
 
-def run_part2_all(model=None, tokenizer=None):
+def run_part2_experiments(model=None, tokenizer=None):
     build_sample_if_missing()  # ~10 s if cached
     anthology = load_anthology()
     queries = answerable_queries(load_queries())
@@ -771,10 +767,8 @@ STEPS = {
     "rewrite": run_query_rewriting,
     "hyde": lambda m=None, t=None: run_hyde_step(),
     "prompt": run_prompt_engineering,
-    "metadata": run_metadata_probe,
-    "all": run_part2_all,
+    "all": run_part2_experiments,
 }
-
 
 if __name__ == "__main__":  # debug convenience — NOT the reproduction path
     ap = argparse.ArgumentParser()

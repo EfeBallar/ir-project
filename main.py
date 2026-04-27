@@ -1,9 +1,6 @@
-import json
-import torch
-import datasets
-import transformers
+import json, torch, datasets, transformers
 from transformers import AutoTokenizer, AutoModelForCausalLM
-from tf_idf import (
+from part_1.tf_idf import (
     doc_to_text, tokenize_docs, train_bigram_model,
     vectorize, vectorize_query, build_vocab, dot_sparse
 )
@@ -384,6 +381,6 @@ if __name__ == "__main__":
     print("[Part 1/2] running Part 1 experiments (~6 min on T4)")
     run_part1_experiments()
     print("[Part 2/2] running Part 2 experiments (~60 min on T4)")
-    from part2 import run_part2_all
+    from part_2.part2 import run_part2_experiments
 
-    run_part2_all(model=model, tokenizer=tokenizer)
+    run_part2_experiments(model=model, tokenizer=tokenizer)
