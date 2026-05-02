@@ -33,7 +33,7 @@ from part_1.tf_idf import (
     vectorize_query,
 )
 
-MODEL_NAME = "sentence-transformers/all-mpnet-base-v2"
+SENTENCE_TRANSFORMER_MODEL_NAME = "sentence-transformers/all-mpnet-base-v2"
 EVAL_K = 10
 FULL_TEXT_TRUNC_WORDS = 220
 
@@ -243,7 +243,7 @@ def _print_subword_demo(index):
 def run_neural_baseline(
     anthology,
     queries,
-    model_name=MODEL_NAME,
+    model_name=SENTENCE_TRANSFORMER_MODEL_NAME,
     device=None,
     k=EVAL_K,
 ):
@@ -321,7 +321,7 @@ def run_long_docs(
     anthology,
     queries,
     baseline_index=None,
-    model_name=MODEL_NAME,
+    model_name=SENTENCE_TRANSFORMER_MODEL_NAME,
     device=None,
     k=EVAL_K,
 ):
@@ -403,7 +403,9 @@ def run_query_rewriting(index=None, queries=None, model=None, tokenizer=None, k=
 
     if index is None:
         anthology = load_anthology()
-        index = NeuralIndex(model_name=MODEL_NAME, fields=("title", "abstract"))
+        index = NeuralIndex(
+            model_name=SENTENCE_TRANSFORMER_MODEL_NAME, fields=("title", "abstract")
+        )
         index.build(anthology)
 
     original_ranked_lists = []
@@ -477,7 +479,9 @@ def run_hyde(*args, **kwargs):
 
     if index is None:
         anthology = load_anthology()
-        index = NeuralIndex(model_name=MODEL_NAME, fields=("title", "abstract"))
+        index = NeuralIndex(
+            model_name=SENTENCE_TRANSFORMER_MODEL_NAME, fields=("title", "abstract")
+        )
         index.build(anthology)
 
     baseline_ranked_lists = []
@@ -757,7 +761,7 @@ def run_long_step():
     queries = answerable_queries(load_queries())
 
     baseline_index = NeuralIndex(
-        model_name=MODEL_NAME,
+        model_name=SENTENCE_TRANSFORMER_MODEL_NAME,
         fields=("title", "abstract"),
     )
     baseline_index.build(anthology)
@@ -788,7 +792,7 @@ def run_part2_experiments(model=None, tokenizer=None):
     _banner("HyDE (98 hypothetical abstracts)", "15 min on T4")
     run_hyde(index, queries, model, tokenizer)
 
-    _banner("Prompt engineering (cite / abstain / hardened)", "5 min on T4")
+    _banner("Prompt engineering (cite / abstain / hardened)", "10 min on T4")
     run_prompt_engineering(index, queries, model, tokenizer)
 
 
