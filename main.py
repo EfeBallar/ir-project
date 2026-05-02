@@ -6,34 +6,15 @@ from part_1.tf_idf import (
 )
 
 # ── Config ────────────────────────────────────────────────────────────────────
-DATA_PATH      = "./irse_documents_2026_recipes.parquet"
-QUERIES_PATH   = "./irse_queries_2026_recipes.json"
-MODEL_ID       = "mistralai/Mistral-7B-Instruct-v0.2"
-K_GENERATION   = 5     # docs passed to LLM
-K_EVALUATION   = 10    # docs used for IR metrics
-
-# ── Load model and tokenizer ──────────────────────────────────────────────────
-tokenizer = AutoTokenizer.from_pretrained(MODEL_ID)
-
-bnb_config = transformers.BitsAndBytesConfig(
-    load_in_4bit=True,
-    bnb_4bit_use_double_quant=True,
-    bnb_4bit_quant_type="nf4",
-    bnb_4bit_compute_dtype=torch.bfloat16
-)
-
-model = AutoModelForCausalLM.from_pretrained(
-    MODEL_ID,
-    trust_remote_code=True,
-    quantization_config=bnb_config,
-    device_map='auto'
-)
-
-print("Model loaded.\n")
+PART_1_DATA_PATH = "part_1/irse_documents_2026_recipes.parquet"
+PART_1_QUERIES_PATH = "part_1/irse_queries_2026_recipes.json"
+MODEL_ID = "mistralai/Mistral-7B-Instruct-v0.2"
+K_GENERATION = 5  # docs passed to LLM
+K_EVALUATION = 10  # docs used for IR metrics
 
 # ── Load and index dataset ────────────────────────────────────────────────────
-dataset = datasets.load_dataset("parquet", data_files=DATA_PATH)["train"]
-gold_queries = json.load(open(QUERIES_PATH))
+dataset = datasets.load_dataset("parquet", data_files=PART_1_DATA_PATH)["train"]
+gold_queries = json.load(open(PART_1_QUERIES_PATH))
 
 doc_texts      = [doc_to_text(doc) for doc in dataset]
 tokenized_docs = tokenize_docs(doc_texts)
@@ -138,7 +119,7 @@ PROMPT_VARIANTS = {
 }
 
 # ── LLM inference ─────────────────────────────────────────────────────────────
-def generate(prompt, max_new_tokens=300):
+def generate(prompt, model, tokenizer, max_new_tokens=300):
     encoded = tokenizer(prompt, return_tensors="pt", add_special_tokens=False)
     encoded = encoded.to("cuda")
     generated_ids = model.generate(**encoded, max_new_tokens=max_new_tokens, do_sample=True)
@@ -147,7 +128,7 @@ def generate(prompt, max_new_tokens=300):
     return answer
 
 # Queries to use for qualitative LLM analysis (Part 1)
-DEMO_QUERIES = [
+PART_1_DEMO_QUERIES = [
     "What temperature should I pre-heat my oven to when making chicken quesadillas?",
     "What is the most important ingredient in borscht?",
     "Can I make borscht vegetarian?",
@@ -155,7 +136,7 @@ DEMO_QUERIES = [
     "Is beef Wellington the only kind of meaty Wellington? If not, what other kinds do you know?",
 ]
 
-REASONING_QUERIES = [
+PART_1_REASONING_QUERIES = [
     "What temperature should I pre-heat my oven to when making chicken quesadillas?",
     "What is the most important ingredient in borscht?",
     "Is beef Wellington the only kind of meaty Wellington? If not, what other kinds do you know?",
@@ -164,7 +145,7 @@ REASONING_QUERIES = [
 ]
 
 
-def run_part1_experiments():
+def run_part1_experiments(model, tokenizer):
     # ── Experiment 1: Compare prompt variants ────────────────────────────────
     # Assignment bullet 6: "Give two or more sets of instructions"
     print("[Part 1][Step 1/5] Prompt variant comparison (~3 min on T4)")
@@ -172,13 +153,13 @@ def run_part1_experiments():
     print("═" * 70)
 
     # ~3 min on T4
-    for query in DEMO_QUERIES[:3]:   # run on first 3 queries to save time
+    for query in PART_1_DEMO_QUERIES[:3]:  # run on first 3 queries to save time
         retrieved = retrieve(query, k=K_GENERATION)
         print(f"\nQuery: {query}")
         print(f"Retrieved: {[doc.get('name') for _, doc in retrieved]}\n")
         for variant_name, prompt_fn in PROMPT_VARIANTS.items():
             prompt = prompt_fn(query, retrieved)
-            answer = generate(prompt)
+            answer = generate(prompt, model, tokenizer)
             print(f"── Prompt {variant_name} ──")
             print(f"{answer}\n")
         print("-" * 70)
@@ -201,7 +182,7 @@ short stories, and four books of poetry...
 """
     # use their provided irrelevant context instead of wrong recipes
     prompt = f"<s>[INST] Answer the following question using only the provided context.\n\nQuestion: {test_query}\n\nContext:\n{irrelevant_context}\n\nAnswer: [/INST]"
-    answer = generate(prompt)
+    answer = generate(prompt, model, tokenizer)
     print(f"Query: {test_query}")
     print(f"LM response:\n{answer}")
 
@@ -213,10 +194,10 @@ short stories, and four books of poetry...
     print("═" * 70)
 
     # ~2 min on T4
-    for query in REASONING_QUERIES:
+    for query in PART_1_REASONING_QUERIES:
         retrieved = retrieve(query, k=K_GENERATION)
         prompt = prompt_b(query, retrieved)
-        answer = generate(prompt)
+        answer = generate(prompt,model, tokenizer)
         print(f"\nQuery: {query}")
         print(f"Retrieved: {[doc.get('name') for _, doc in retrieved]}")
         print(f"Answer: {answer}")
@@ -234,11 +215,11 @@ short stories, and four books of poetry...
     # ~30 s on T4
     # With correct retrieved context
     retrieved = retrieve(grounding_query, k=K_GENERATION)
-    answer_with_context = generate(prompt_b(grounding_query, retrieved))
+    answer_with_context = generate(prompt_b(grounding_query, retrieved),model, tokenizer)
 
     # Without any context (bare LM knowledge)
     bare_prompt = f"<s>[INST] {grounding_query} [/INST]"
-    answer_without_context = generate(bare_prompt)
+    answer_without_context = generate(bare_prompt,model, tokenizer)
 
     print(f"\nQuery: {grounding_query}")
     print(f"Retrieved: {[doc.get('name') for _, doc in retrieved]}")
@@ -255,8 +236,8 @@ short stories, and four books of poetry...
 
     # ~30 s on T4
     retrieved = retrieve(score_query, k=K_GENERATION)
-    answer_no_scores = generate(prompt_b(score_query, retrieved))
-    answer_with_scores = generate(prompt_b_with_scores(score_query, retrieved))
+    answer_no_scores = generate(prompt_b(score_query, retrieved),model, tokenizer)
+    answer_with_scores = generate(prompt_b_with_scores(score_query, retrieved),model, tokenizer)
 
     print(f"\nQuery: {score_query}")
     print(f"Scores: {[round(s, 3) for s, _ in retrieved]}")
@@ -378,8 +359,27 @@ The recipe with the highest relevance score, Recipe 1, specifies that the oven s
 """
 
 if __name__ == "__main__":
+    # Load model and tokenizer
+    print("Loading LM and tokenizer...")
+    tokenizer = AutoTokenizer.from_pretrained(MODEL_ID)
+
+    bnb_config = transformers.BitsAndBytesConfig(
+        load_in_4bit=True,
+        bnb_4bit_use_double_quant=True,
+        bnb_4bit_quant_type="nf4",
+        bnb_4bit_compute_dtype=torch.bfloat16,
+    )
+
+    model = AutoModelForCausalLM.from_pretrained(
+        MODEL_ID,
+        trust_remote_code=True,
+        quantization_config=bnb_config,
+        device_map="auto",
+    )
+    print("LM loaded.\n")
+    
     print("[Part 1/2] running Part 1 experiments (~6 min on T4)")
-    run_part1_experiments()
+    run_part1_experiments(model,tokenizer)
     print("[Part 2/2] running Part 2 experiments (~60 min on T4)")
     from part_2.part2 import run_part2_experiments
 
