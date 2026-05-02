@@ -1,13 +1,19 @@
-import json, datasets
+import json
 from pathlib import Path
+
+import datasets
 
 R_NUMBER_SEED = 1072381
 DOCS_TO_ADD = 2000
 
-DATA_PATH = Path("./anthology_sample.parquet")
-QUERY_DOCS_PATH = "./acl_anthology_queries.parquet"
-FULL_DOCS_PATH = "./acl_anthology_full.parquet"
-QUERIES_PATH = Path("./acl_anthology_queries.json")
+# Get the directory where this script is located
+SCRIPT_DIR = Path(__file__).parent
+
+DATA_PATH = SCRIPT_DIR / "anthology_sample.parquet"
+QUERY_DOCS_PATH = SCRIPT_DIR / "acl_anthology_queries.parquet"
+FULL_DOCS_PATH = SCRIPT_DIR / "acl_anthology_full.parquet"
+QUERIES_PATH = SCRIPT_DIR / "acl_anthology_queries.json"
+
 
 def build_sample_if_missing(data_path=DATA_PATH):
     """Build anthology sample parquet once, then reuse it."""
@@ -18,15 +24,24 @@ def build_sample_if_missing(data_path=DATA_PATH):
         return data_path
 
     print("[part2_data] building anthology sample parquet...")
-    query_documents = datasets.load_dataset("parquet", data_files=QUERY_DOCS_PATH)[
+    all_documents = datasets.load_dataset("parquet", data_files=str(FULL_DOCS_PATH))[
         "train"
     ]
-    all_documents = datasets.load_dataset("parquet", data_files=FULL_DOCS_PATH)["train"]
 
-    random_documents = all_documents.shuffle(seed=R_NUMBER_SEED).take(DOCS_TO_ADD)
-    anthology_sample = datasets.concatenate_datasets(
-        [query_documents, random_documents]
-    ).shuffle(seed=R_NUMBER_SEED)
+    # If query documents parquet exists, use it; otherwise just sample from full
+    if Path(QUERY_DOCS_PATH).exists():
+        query_documents = datasets.load_dataset(
+            "parquet", data_files=str(QUERY_DOCS_PATH)
+        )["train"]
+        random_documents = all_documents.shuffle(seed=R_NUMBER_SEED).take(DOCS_TO_ADD)
+        anthology_sample = datasets.concatenate_datasets(
+            [query_documents, random_documents]
+        ).shuffle(seed=R_NUMBER_SEED)
+    else:
+        print(
+            f"[part2_data] {QUERY_DOCS_PATH} not found, sampling from full anthology..."
+        )
+        anthology_sample = all_documents.shuffle(seed=R_NUMBER_SEED).take(DOCS_TO_ADD)
 
     anthology_sample.to_parquet(str(data_path))
     print(f"[part2_data] wrote sample: {data_path} ({len(anthology_sample)} docs)")

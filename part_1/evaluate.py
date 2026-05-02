@@ -2,9 +2,18 @@
 # Run: python evaluate.py
 # Estimated runtime: 5 min
 
-import json, datasets
-from tf_idf import doc_to_text, tokenize_docs, train_bigram_model, vectorize, build_vocab
-from metrics import retrieve_ids, average_precision, precision_recall_f1
+import json
+
+import datasets
+
+from .metrics import average_precision, precision_recall_f1, retrieve_ids
+from .tf_idf import (
+    build_vocab,
+    doc_to_text,
+    tokenize_docs,
+    train_bigram_model,
+    vectorize,
+)
 
 # ── Data loading ────────────────────────────────────────────────────────────
 DATA_PATH = "./irse_documents_2026_recipes.parquet"
@@ -17,7 +26,9 @@ doc_texts = [doc_to_text(doc) for doc in dataset]
 tokenized_docs = tokenize_docs(doc_texts)
 bigram = train_bigram_model(tokenized_docs)
 tokenized_docs = [bigram[doc] for doc in tokenized_docs]
-vocab, idf, df = build_vocab(tokenized_docs, min_df=5, max_df_ratio=0.5, max_vocab=50000)
+vocab, idf, df = build_vocab(
+    tokenized_docs, min_df=5, max_df_ratio=0.5, max_vocab=50000
+)
 print("Built vocab.")
 doc_vectors = [vectorize(tokens, vocab, idf) for tokens in tokenized_docs]
 print("Vectorized docs.")
@@ -67,20 +78,22 @@ Query: lunch baked at 200 °C
 ─────────────────────────────────────────────────────────────"""
 # Filter out unanswerable queries (empty r) — they have no relevant docs
 answerable_queries = [q for q in gold_queries["queries"] if len(q["r"]) > 0]
-print(f"Loaded {len(gold_queries['queries'])} queries, {len(answerable_queries)} answerable.")
+print(
+    f"Loaded {len(gold_queries['queries'])} queries, {len(answerable_queries)} answerable."
+)
 
 # ── Main evaluation (k=10, no threshold) ─────────────────────────────────────
 precisions, recalls, f1s, aps = [], [], [], []
 
 for entry in answerable_queries:
-    query        = entry["q"]
+    query = entry["q"]
     relevant_ids = set(doc_id for doc_id, _ in entry["r"])
 
     ranked = retrieve_ids(query, doc_vectors, vocab, idf, bigram, k=10, threshold=0)
-    retrieved_ids = [idx for _, idx in ranked]   # ordered list for AP
+    retrieved_ids = [idx for _, idx in ranked]  # ordered list for AP
 
     p, r, f1 = precision_recall_f1(retrieved_ids, relevant_ids)
-    ap        = average_precision(retrieved_ids, relevant_ids)
+    ap = average_precision(retrieved_ids, relevant_ids)
 
     precisions.append(p)
     recalls.append(r)
@@ -88,27 +101,29 @@ for entry in answerable_queries:
     aps.append(ap)
 
 # ── Macro averages (mean over queries) ──────────────────────────────────────
-macro_p  = sum(precisions) / len(precisions)
-macro_r  = sum(recalls)    / len(recalls)
-macro_f1 = sum(f1s)        / len(f1s)
+macro_p = sum(precisions) / len(precisions)
+macro_r = sum(recalls) / len(recalls)
+macro_f1 = sum(f1s) / len(f1s)
 
 # ── Micro averages (aggregate TP/FP/FN first, then compute) ─────────────────
 total_tp, total_retrieved, total_relevant = 0, 0, 0
 
 for entry in answerable_queries:
-    query        = entry["q"]
+    query = entry["q"]
     relevant_ids = set(doc_id for doc_id, _ in entry["r"])
-    ranked       = retrieve_ids(query, doc_vectors, vocab, idf, bigram, k=10, threshold=0)
+    ranked = retrieve_ids(query, doc_vectors, vocab, idf, bigram, k=10, threshold=0)
     retrieved_ids = [idx for _, idx in ranked]
 
     tp = len(set(retrieved_ids) & relevant_ids)
-    total_tp        += tp
+    total_tp += tp
     total_retrieved += len(retrieved_ids)
-    total_relevant  += len(relevant_ids)
+    total_relevant += len(relevant_ids)
 
-micro_p  = total_tp / total_retrieved if total_retrieved > 0 else 0.0
-micro_r  = total_tp / total_relevant  if total_relevant  > 0 else 0.0
-micro_f1 = (2 * micro_p * micro_r / (micro_p + micro_r)) if (micro_p + micro_r) > 0 else 0.0
+micro_p = total_tp / total_retrieved if total_retrieved > 0 else 0.0
+micro_r = total_tp / total_relevant if total_relevant > 0 else 0.0
+micro_f1 = (
+    (2 * micro_p * micro_r / (micro_p + micro_r)) if (micro_p + micro_r) > 0 else 0.0
+)
 
 # ── MAP ──────────────────────────────────────────────────────────────────────
 # MAP = (1 / |Q|) * sum_{j=1}^{|Q|} AP(q_j)
@@ -133,12 +148,18 @@ for t in [0.05, 0.10, 0.15, 0.20, 0.25, 0.30, 0.35, 0.40]:
     ps, rs, fs = [], [], []
     for entry in answerable_queries:
         rel = set(doc_id for doc_id, _ in entry["r"])
-        ranked = retrieve_ids(entry["q"], doc_vectors, vocab, idf, bigram, k=3, threshold=t)
+        ranked = retrieve_ids(
+            entry["q"], doc_vectors, vocab, idf, bigram, k=3, threshold=t
+        )
         ret = [idx for _, idx in ranked]
         p, r, f1 = precision_recall_f1(ret, rel)
-        ps.append(p); rs.append(r); fs.append(f1)
-    print(f"  threshold={t:.2f}  macro-F1={sum(fs)/len(fs):.4f}  "
-          f"macro-P={sum(ps)/len(ps):.4f}  macro-R={sum(rs)/len(rs):.4f}")
+        ps.append(p)
+        rs.append(r)
+        fs.append(f1)
+    print(
+        f"  threshold={t:.2f}  macro-F1={sum(fs) / len(fs):.4f}  "
+        f"macro-P={sum(ps) / len(ps):.4f}  macro-R={sum(rs) / len(rs):.4f}"
+    )
 print("────────────────────────────────────────────────────────────\n")
 
 # ── k sensitivity analysis  ───────────────
@@ -147,15 +168,22 @@ print("── k sensitivity ───────")
 for k in [3, 5, 10, 20, 50]:
     ps, rs, fs, aps = [], [], [], []
     for entry in answerable_queries:
-        rel    = set(doc_id for doc_id, _ in entry["r"])
-        ranked = retrieve_ids(entry["q"], doc_vectors, vocab, idf, bigram, k=k, threshold=0)
-        ret    = [idx for _, idx in ranked]
+        rel = set(doc_id for doc_id, _ in entry["r"])
+        ranked = retrieve_ids(
+            entry["q"], doc_vectors, vocab, idf, bigram, k=k, threshold=0
+        )
+        ret = [idx for _, idx in ranked]
         p, r, f1 = precision_recall_f1(ret, rel)
         ap = average_precision(ret, rel)
-        ps.append(p); rs.append(r); fs.append(f1); aps.append(ap)
-    print(f"  k={k}  macro-F1={sum(fs)/len(fs):.4f}  "
-          f"macro-P={sum(ps)/len(ps):.4f}  macro-R={sum(rs)/len(rs):.4f}  "
-          f"MAP={sum(aps)/len(aps):.4f}")
+        ps.append(p)
+        rs.append(r)
+        fs.append(f1)
+        aps.append(ap)
+    print(
+        f"  k={k}  macro-F1={sum(fs) / len(fs):.4f}  "
+        f"macro-P={sum(ps) / len(ps):.4f}  macro-R={sum(rs) / len(rs):.4f}  "
+        f"MAP={sum(aps) / len(aps):.4f}"
+    )
 print("──────────────────────────\n")
 """
 Loaded 47 queries, 41 answerable.

@@ -3,12 +3,14 @@
 # Run: python field_experiment.py
 # Estimated runtime: ~10 min
 
-import json, datasets
+import json
+
+import datasets
 from gensim.models import Phrases
 from gensim.models.phrases import Phraser
 
-from metrics import average_precision, retrieve_ids
-from tf_idf import build_vocab, preprocess, vectorize
+from .metrics import average_precision, retrieve_ids
+from .tf_idf import build_vocab, preprocess, vectorize
 
 # ── Config ────────────────────────────────────────────────────────────────────
 DATA_PATH = "./irse_documents_2026_recipes.parquet"
@@ -25,6 +27,7 @@ FIELD_COMBINATIONS = [
     ["name", "ingredients", "description", "tags", "steps"],  # everything
 ]
 
+
 # ── doc_to_text with variable fields (unique to this experiment) ──────────────
 def doc_to_text(doc, fields):
     parts = []
@@ -34,6 +37,7 @@ def doc_to_text(doc, fields):
             val = " ".join(val)
         parts.append(val)
     return " ".join(parts)
+
 
 # ── Evaluation  ────────────────────────────────────────────────────────
 def evaluate(doc_vectors, bigram, vocab, idf, gold_queries, k=K):
@@ -62,6 +66,7 @@ def evaluate(doc_vectors, bigram, vocab, idf, gold_queries, k=K):
         "MAP": sum(aps) / n,
     }
 
+
 # ── Main ──────────────────────────────────────────────────────────────────────
 if __name__ == "__main__":
     print("Loading dataset and queries...")
@@ -72,7 +77,9 @@ if __name__ == "__main__":
     # Train bigram model on all fields
     print("Training bigram model...")
     base_tokens = [
-        preprocess(doc_to_text(doc, ["name", "ingredients", "description", "tags", "steps"]))
+        preprocess(
+            doc_to_text(doc, ["name", "ingredients", "description", "tags", "steps"])
+        )
         for doc in dataset
     ]
     phrases = Phrases(base_tokens, min_count=5, threshold=3.0)

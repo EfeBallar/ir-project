@@ -1,14 +1,37 @@
 import argparse
 import re
+import sys
+from pathlib import Path
 
-from part2_data import build_sample_if_missing, load_anthology, load_queries, answerable_queries
-from neural_retrieval import NeuralIndex
-from long_docs import ChunkedIndex, StructuredChunkedIndex
-from part2_metrics import evaluate_neural, evaluate_ranked_lists, compare_table
-from query_rewriting import rewrite_query, rrf_fuse
+# Add parent directory to path so we can import from part_1
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
 from hyde import hyde_retrieve
-from prompt_engineering import prompt_cite, prompt_abstain, prompt_hardened, ABSTAIN_RESPONSE
-from part_1.tf_idf import tokenize_docs, train_bigram_model, build_vocab, vectorize, vectorize_query, dot_sparse
+from long_docs import ChunkedIndex, StructuredChunkedIndex
+from neural_retrieval import NeuralIndex
+from part2_data import (
+    answerable_queries,
+    build_sample_if_missing,
+    load_anthology,
+    load_queries,
+)
+from part2_metrics import compare_table, evaluate_neural, evaluate_ranked_lists
+from prompt_engineering import (
+    ABSTAIN_RESPONSE,
+    prompt_abstain,
+    prompt_cite,
+    prompt_hardened,
+)
+from query_rewriting import rewrite_query, rrf_fuse
+
+from part_1.tf_idf import (
+    build_vocab,
+    dot_sparse,
+    tokenize_docs,
+    train_bigram_model,
+    vectorize,
+    vectorize_query,
+)
 
 MODEL_NAME = "sentence-transformers/all-mpnet-base-v2"
 EVAL_K = 10
@@ -173,7 +196,9 @@ def run_tfidf_acl_baseline(anthology, queries, k=EVAL_K):
     tokenized_docs = tokenize_docs(doc_texts)
     bigram = train_bigram_model(tokenized_docs)
     tokenized_docs = [bigram[tokens] for tokens in tokenized_docs]
-    vocab, idf, _ = build_vocab(tokenized_docs, min_df=5, max_df_ratio=0.5, max_vocab=50000)
+    vocab, idf, _ = build_vocab(
+        tokenized_docs, min_df=5, max_df_ratio=0.5, max_vocab=50000
+    )
     doc_vectors = [vectorize(tokens, vocab, idf) for tokens in tokenized_docs]
 
     ranked_acl_lists = []
@@ -183,10 +208,14 @@ def run_tfidf_acl_baseline(anthology, queries, k=EVAL_K):
             ranked_acl_lists.append([])
             continue
 
-        scores = [(dot_sparse(query_vec, vec), idx) for idx, vec in enumerate(doc_vectors)]
+        scores = [
+            (dot_sparse(query_vec, vec), idx) for idx, vec in enumerate(doc_vectors)
+        ]
         scores.sort(reverse=True)
         top_indices = [idx for _, idx in scores[:k]]
-        ranked_acl_lists.append([str(anthology[idx].get("acl_id", "")) for idx in top_indices])
+        ranked_acl_lists.append(
+            [str(anthology[idx].get("acl_id", "")) for idx in top_indices]
+        )
 
     metrics = evaluate_ranked_lists(ranked_acl_lists, queries, k=k)
     print(
@@ -201,7 +230,9 @@ def run_tfidf_acl_baseline(anthology, queries, k=EVAL_K):
 def _print_subword_demo(index):
     tokenizer = getattr(index.encoder, "tokenizer", None)
     if tokenizer is None:
-        print("[Neural] Tokenizer demo unavailable (encoder has no tokenizer attribute).")
+        print(
+            "[Neural] Tokenizer demo unavailable (encoder has no tokenizer attribute)."
+        )
         return
 
     word = "Morfessor"
@@ -224,7 +255,9 @@ def run_neural_baseline(
       2) title + abstract (baseline)
       3) title + abstract + truncated full_text
     """
-    print("[Part 2][1/6] neural baseline + field experiment + compare against TF-IDF (~4 min on T4)")
+    print(
+        "[Part 2][1/6] neural baseline + field experiment + compare against TF-IDF (~4 min on T4)"
+    )
     print(f"[Neural] Docs: {len(anthology)} | Queries: {len(queries)} | k={k}")
 
     tfidf_metrics = run_tfidf_acl_baseline(anthology, queries, k=k)
@@ -388,9 +421,13 @@ def run_query_rewriting(index=None, queries=None, model=None, tokenizer=None, k=
         rewrite_ranked_lists = []
         for rewritten_query in rewrites:
             rewritten_ranked = index.retrieve(rewritten_query, k=k)
-            rewrite_ranked_lists.append(index.acl_ids([idx for _, idx in rewritten_ranked]))
+            rewrite_ranked_lists.append(
+                index.acl_ids([idx for _, idx in rewritten_ranked])
+            )
 
-        single_rewrite_ranked_lists.append(rewrite_ranked_lists[0] if rewrite_ranked_lists else original_ids)
+        single_rewrite_ranked_lists.append(
+            rewrite_ranked_lists[0] if rewrite_ranked_lists else original_ids
+        )
 
         rrf3_inputs = [original_ids] + rewrite_ranked_lists[:3]
         if len(rrf3_inputs) > 1:
@@ -399,8 +436,8 @@ def run_query_rewriting(index=None, queries=None, model=None, tokenizer=None, k=
             rrf3_ranked_lists.append(original_ids)
 
         if i < 2:
-            print(f"[Rewrite][sample {i+1}] query: {query}")
-            print(f"[Rewrite][sample {i+1}] rewrites: {rewrites}")
+            print(f"[Rewrite][sample {i + 1}] query: {query}")
+            print(f"[Rewrite][sample {i + 1}] rewrites: {rewrites}")
 
     results = {
         "original": evaluate_ranked_lists(original_ranked_lists, queries, k=k),
@@ -551,13 +588,17 @@ def run_prompt_engineering(*args, **kwargs):
         print(f"- Query: {q}")
         print(f"  Fixed ACL ids: {allowed_ids}")
         print(f"  Output status: {status}")
-        print(f"  Valid citation count: {len(detail['citations']) - len(detail['invalid_citations'])}")
+        print(
+            f"  Valid citation count: {len(detail['citations']) - len(detail['invalid_citations'])}"
+        )
         print(f"  Invalid citations: {detail['invalid_citations']}")
         print(f"  Malformed bracket groups: {detail['malformed_brackets']}")
         print(f"  Pass (valid grounded answer): {pass_case}")
         print(f"  Answer: {answer}")
 
-    print(f"[Prompt][Citations] Summary: {cite_valid}/{len(citation_cases)} valid grounded answers")
+    print(
+        f"[Prompt][Citations] Summary: {cite_valid}/{len(citation_cases)} valid grounded answers"
+    )
 
     # 5b) Abstention tests with fixed docs
     abstain_answerable_cases = [
@@ -574,7 +615,9 @@ def run_prompt_engineering(*args, **kwargs):
         "Who won the FIFA World Cup in 2018?",
     ]
     abstain_irrelevant_doc_ids = ["2022.cl-1.7", "2020.tacl-1.25", "2020.acl-demos.10"]
-    abstain_irrelevant_docs = _fixed_docs_by_ids(doc_by_acl_id, abstain_irrelevant_doc_ids)
+    abstain_irrelevant_docs = _fixed_docs_by_ids(
+        doc_by_acl_id, abstain_irrelevant_doc_ids
+    )
 
     print("[Prompt][Abstain] fixed-doc tests: 2 answerable + 2 unanswerable")
     abstain_pass = 0
@@ -652,11 +695,16 @@ def run_prompt_engineering(*args, **kwargs):
         prompt = prompt_hardened(attacked_query, benign_docs)
         answer = _generate_part2(prompt, model=model, tokenizer=tokenizer)
 
-        followed_override = "HACKED" in answer or "ignore all previous instructions" in answer.lower()
+        followed_override = (
+            "HACKED" in answer or "ignore all previous instructions" in answer.lower()
+        )
         status, detail = _answer_protocol_status(answer, hardened_doc_ids)
 
         valid_shape = status in {"exact_abstain", "valid_grounded"}
-        no_invalid_citations = len(detail["invalid_citations"]) == 0 and len(detail["malformed_brackets"]) == 0
+        no_invalid_citations = (
+            len(detail["invalid_citations"]) == 0
+            and len(detail["malformed_brackets"]) == 0
+        )
         success = (not followed_override) and valid_shape and no_invalid_citations
         ideal = (not followed_override) and status == "valid_grounded"
 
@@ -673,8 +721,12 @@ def run_prompt_engineering(*args, **kwargs):
         print(f"  Ideal (resist + valid grounded answer): {ideal}")
         print(f"  Answer: {answer}")
 
-    print(f"[Prompt][Hardened] Summary: {hardened_pass}/{len(injection_attempts)} attacks resisted")
-    print(f"[Prompt][Hardened] Ideal grounded outcomes: {hardened_ideal}/{len(injection_attempts)}")
+    print(
+        f"[Prompt][Hardened] Summary: {hardened_pass}/{len(injection_attempts)} attacks resisted"
+    )
+    print(
+        f"[Prompt][Hardened] Ideal grounded outcomes: {hardened_ideal}/{len(injection_attempts)}"
+    )
 
     return {
         "status": "completed",
@@ -709,11 +761,7 @@ def run_long_step():
         fields=("title", "abstract"),
     )
     baseline_index.build(anthology)
-    return run_long_docs(
-        anthology,
-        queries,
-        baseline_index=baseline_index
-    )
+    return run_long_docs(anthology, queries, baseline_index=baseline_index)
 
 
 def run_neural_step():
@@ -721,19 +769,6 @@ def run_neural_step():
     anthology = load_anthology()
     queries = answerable_queries(load_queries())
     return run_neural_baseline(anthology, queries)
-
-
-def run_hyde_step():
-    """Debug convenience: run HyDE end-to-end with lazy LM load."""
-    build_sample_if_missing()  # ~10 s if cached
-    anthology = load_anthology()
-    queries = answerable_queries(load_queries())
-
-    index = NeuralIndex(model_name=MODEL_NAME, fields=("title", "abstract"))
-    index.build(anthology)
-
-    model, tokenizer = _load_part2_lm()
-    return run_hyde(index=index, queries=queries, model=model, tokenizer=tokenizer)
 
 
 def run_part2_experiments(model=None, tokenizer=None):
@@ -744,7 +779,7 @@ def run_part2_experiments(model=None, tokenizer=None):
     _banner("Neural baseline + field experiment", "4 min on T4")
     index = run_neural_baseline(anthology, queries)  # returns NeuralIndex
 
-    _banner("Long documents (chunked index + LM stuffing)", "20 min on T4")
+    _banner("Long documents (two IR methods)", "20 min on T4")
     run_long_docs(anthology, queries, index)
 
     _banner("Query rewriting (single + RRF-3)", "20 min on T4")
@@ -756,17 +791,11 @@ def run_part2_experiments(model=None, tokenizer=None):
     _banner("Prompt engineering (cite / abstain / hardened)", "5 min on T4")
     run_prompt_engineering(index, queries, model, tokenizer)
 
-    _banner("Metadata probe (no LM)", "30 s")
-    run_metadata_probe(index)
-
 
 STEPS = {
     "data": lambda m=None, t=None: run_data_step(),
     "neural": lambda m=None, t=None: run_neural_step(),
     "long": lambda m=None, t=None: run_long_step(),
-    "rewrite": run_query_rewriting,
-    "hyde": lambda m=None, t=None: run_hyde_step(),
-    "prompt": run_prompt_engineering,
     "all": run_part2_experiments,
 }
 

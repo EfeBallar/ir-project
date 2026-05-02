@@ -1,5 +1,11 @@
 """Part 2 retrieval evaluation helpers (ACL anthology)."""
 
+import sys
+from pathlib import Path
+
+# Add parent directory to path so we can import from part_1
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
 from part_1.metrics import average_precision, precision_recall_f1
 
 
