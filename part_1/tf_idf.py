@@ -1,9 +1,15 @@
 # utility functions - can not execute
-import math, re
+import math
+import re
+from collections import Counter
+
+import nltk
 import numpy as np
 from gensim.models import Phrases
 from gensim.models.phrases import Phraser
-from collections import Counter
+
+nltk.download("stopwords", quiet=True)
+nltk.download("wordnet", quiet=True)
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
 
